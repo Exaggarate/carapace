@@ -123,13 +123,14 @@ test("loop stops at maxToolIterations with stopReason max_iterations", async () 
   assert.equal(result.toolCallsExecuted, 2);
 });
 
-test("provider failures surface as stopReason error", async () => {
+test("provider failures surface as a friendly one-liner with stopReason error", async () => {
   const { runtime, sessions } = makeRuntime([() => { throw new LlmError("boom"); }]);
   const result = await runAgentTurn({ sessionId: "test:s6", text: "make it fail" }, runtime);
   assert.equal(result.stopReason, "error");
-  assert.ok(result.reply.includes("boom"));
-  // The failure reply is persisted so the next turn has context.
+  assert.ok(result.reply.startsWith("🦞 brain hiccup"), `reply: ${result.reply}`);
+  assert.ok(!result.reply.includes("boom"), "no raw dump in the user-facing reply");
+  // The friendly line is persisted so the next turn has context.
   const last = sessions.history("test:s6").at(-1);
   assert.equal(last.role, "assistant");
-  assert.ok(last.content.includes("boom"));
+  assert.ok(last.content.startsWith("🦞 brain hiccup"));
 });

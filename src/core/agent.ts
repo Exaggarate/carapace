@@ -4,6 +4,7 @@
 
 import { carapaceHome, type CarapaceConfig } from "../config.js";
 import { loadBootstrapFiles } from "./bootstrap.js";
+import { FallbackProvider } from "./llm/providers/fallback.js";
 import type { MemoryStore } from "./memory.js";
 import type { SessionStore } from "./session.js";
 import type { SkillRegistry } from "./skills.js";
@@ -232,6 +233,16 @@ function watchdogAbortText(limits: TurnLimits): string {
     : limits.watchdogText;
 }
 
+/** Error UX (M11): the one-liner users see when the model backend fails outright. */
+export const FRIENDLY_PROVIDER_FAILURE =
+  "🦞 brain hiccup — the model backend is unreachable right now (all retries and fallbacks exhausted). " +
+  "Send that again in a moment.";
+
+/** Watchdog/budget aborts already read as plain sentences — they pass through untouched. */
+function isTurnLimitText(providerError: string): boolean {
+  return providerError.includes("llm.watchdogTimeoutSec") || providerError.includes("llm.turnTimeoutMs");
+}
+
 /**
  * Run one agent turn:
  *   1. persist the user message
@@ -285,6 +296,8 @@ export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime)
   let toolCallsExecuted = 0;
   let iterations = 0;
   let providerError: string | null = null;
+  /** Whether the most recent provider call was served by a non-primary entry (M11). */
+  let servedByFallback = false;
 
   for (let iteration = 1; iteration <= maxIterations; iteration++) {
     iterations = iteration;
@@ -305,6 +318,9 @@ export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime)
         },
         limits,
       );
+      // Error UX (M11): remember whether a fallback provider served this call so
+      // the final answer can carry the graceful note.
+      if (provider instanceof FallbackProvider) servedByFallback = provider.lastServedViaFallback;
     } catch (error) {
       providerError = error instanceof LlmError ? error.message : `provider failed: ${(error as Error).message}`;
       break;
@@ -338,11 +354,19 @@ export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime)
 
     const reply = completion.text.trim() === "" ? "(the model returned an empty response)" : completion.text;
     sessions.appendAssistant(sessionId, reply);
-    return { sessionId, reply, iterations, toolCallsExecuted, stopReason: "final_answer" };
+    // Error UX (M11): a fallback-served turn is surfaced gracefully — history
+    // keeps the clean reply; the channel gets a short note under it.
+    const userReply = servedByFallback
+      ? `${reply}\n\n— 🦞 served by a fallback provider after the primary failed.`
+      : reply;
+    return { sessionId, reply: userReply, iterations, toolCallsExecuted, stopReason: "final_answer" };
   }
 
   if (providerError !== null) {
-    const reply = `agent turn failed: ${providerError}`;
+    // Error UX (M11): watchdog/budget aborts pass through; every other provider
+    // failure becomes one friendly line instead of a raw error dump — and that
+    // readable line is what gets persisted for the next turn's context.
+    const reply = isTurnLimitText(providerError) ? providerError : FRIENDLY_PROVIDER_FAILURE;
     sessions.appendAssistant(sessionId, reply);
     return { sessionId, reply, iterations, toolCallsExecuted, stopReason: "error" };
   }

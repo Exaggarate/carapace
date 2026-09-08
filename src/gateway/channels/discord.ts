@@ -597,7 +597,10 @@ export class DiscordChannel implements ChannelAdapter {
         return;
       }
       console.error(`[discord] agent turn failed: ${(error as Error).message}`);
-      await this.sendChunks(chatId, `⚠️ turn failed: ${(error as Error).message}`).catch(() => undefined);
+      // Error UX (M11): a friendly notice in-chat; the detail stays in the logs.
+      await this.sendChunks(chatId, "🦞 brain hiccup — something broke mid-turn. Try that again in a moment.").catch(
+        () => undefined,
+      );
       return;
     }
     if (reply !== undefined && reply.text !== "") {

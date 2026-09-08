@@ -15,6 +15,8 @@ export class FallbackProvider implements ChatProvider {
   readonly name = "fallback";
   /** Provider that served the most recent completion (null before the first call). */
   lastServedProvider: string | null = null;
+  /** True when the most recent completion came from a non-primary entry (M11 error UX). */
+  lastServedViaFallback = false;
 
   constructor(
     private readonly providers: ChatProvider[],
@@ -30,6 +32,7 @@ export class FallbackProvider implements ChatProvider {
       try {
         const result = await provider.complete(request);
         this.lastServedProvider = provider.name;
+        this.lastServedViaFallback = index > 0;
         this.log(
           index === 0
             ? `[llm] turn served by provider "${provider.name}"`
