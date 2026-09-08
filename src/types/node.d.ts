@@ -26,6 +26,7 @@ declare module "node:http" {
     listen(port: number, hostname: string, callback?: () => void): HttpServer;
     listen(port: number, callback?: () => void): HttpServer;
     close(callback?: () => void): HttpServer;
+    closeAllConnections(): void;
     address(): { port: number; family: string; address: string } | string | null;
     on(event: "error", listener: (error: Error) => void): HttpServer;
     on(event: string, listener: (...args: unknown[]) => void): HttpServer;

@@ -49,3 +49,14 @@ export interface ChannelAdapter {
   /** Optional: let HTTP-backed channels mount endpoints on the gateway router. */
   mountRoutes?(routes: RouteTable): void;
 }
+
+/** Rejected when a chat's busy queue is full. Channels translate it into a notice. */
+export class BusyTurnError extends Error {
+  constructor(
+    readonly chatKey: string,
+    readonly queueLimit: number,
+  ) {
+    super(`turn queue is full for ${chatKey} (limit ${queueLimit})`);
+    this.name = "BusyTurnError";
+  }
+}

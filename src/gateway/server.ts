@@ -106,6 +106,9 @@ export async function startGatewayServer(options: GatewayServerOptions): Promise
     port: boundPort,
     routes,
     stop: async (): Promise<void> => {
+      // Force-close lingering sockets (idle keep-alives, stuck clients) so a
+      // shutdown or test teardown can never hang on server.close().
+      server.closeAllConnections();
       await new Promise<void>((resolve) => server.close(() => resolve()));
     },
   };

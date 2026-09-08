@@ -11,7 +11,7 @@ import { timingSafeEqual } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { respondJson, RouteTable } from "../server.js";
 import { resolveSecret, type CarapaceConfig } from "../../config.js";
-import type { ChannelAdapter, MessageHandler, SessionDirectory } from "./types.js";
+import { BusyTurnError, type ChannelAdapter, type MessageHandler, type SessionDirectory } from "./types.js";
 
 type BodyRead = { ok: true; value: unknown } | { ok: false; status: number; error: string };
 
@@ -152,6 +152,10 @@ export class ApiChannel implements ChannelAdapter {
         });
         respondJson(response, 200, { reply: reply?.text ?? "", channel: "api", chatId });
       } catch (error) {
+        if (error instanceof BusyTurnError) {
+          respondJson(response, 429, { error: "busy", queueLimit: error.queueLimit });
+          return;
+        }
         respondJson(response, 500, { error: "agent_turn_failed", detail: (error as Error).message });
       }
     });

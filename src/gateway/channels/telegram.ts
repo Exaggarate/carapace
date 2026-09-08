@@ -10,7 +10,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { describeSecretValue, expandTilde, resolveSecret, type CarapaceConfig } from "../../config.js";
-import type { ChannelAdapter, ChannelMessage, ChannelReply, MessageHandler, SessionDirectory } from "./types.js";
+import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler, type SessionDirectory } from "./types.js";
 
 const API_BASE = "https://api.telegram.org";
 const POLL_TIMEOUT_S = 30;
@@ -219,7 +219,6 @@ export class TelegramChannel implements ChannelAdapter {
   private running = false;
   private pollAbort: AbortController | null = null;
   private botUsername: string | null = null;
-  private readonly chatQueues = new Map<string, Promise<void>>();
   private readonly log: (line: string) => void;
   private readonly fetchImpl: (input: string, init?: RequestInit) => Promise<Response>;
   private readonly sessions: SessionDirectory | null;
@@ -391,16 +390,12 @@ export class TelegramChannel implements ChannelAdapter {
   private enqueueUpdate(update: TelegramUpdate): void {
     const message = update.message;
     if (message === undefined) return;
-    const chatId = message.chat === undefined ? "" : String(message.chat.id);
-    if (chatId === "") return;
-    const previous = this.chatQueues.get(chatId) ?? Promise.resolve();
-    const next = previous
-      .then(() => this.handleIncoming(message))
-      .catch((error: unknown) => this.log(`update handling failed: ${(error as Error).message}`));
-    this.chatQueues.set(chatId, next);
-    void next.finally(() => {
-      if (this.chatQueues.get(chatId) === next) this.chatQueues.delete(chatId);
-    });
+    if (message.chat === undefined) return;
+    // Per-chat ordering is the runtime busy gate's job; media downloads and
+    // command replies may interleave safely.
+    void this.handleIncoming(message).catch((error: unknown) =>
+      this.log(`update handling failed: ${(error as Error).message}`),
+    );
   }
 
   /** Process one inbound Telegram message end-to-end. Public for tests and reuse. */
@@ -455,7 +450,19 @@ export class TelegramChannel implements ChannelAdapter {
 
     void this.sendChatAction(chatId);
     const inbound: ChannelMessage = { channel: "telegram", senderId, chatId, text, receivedAt: Date.now() };
-    const reply: ChannelReply | void = await this.handler(inbound);
+    let reply: ChannelReply | void;
+    try {
+      reply = await this.handler(inbound);
+    } catch (error) {
+      if (error instanceof BusyTurnError) {
+        await this.send(
+          chatId,
+          `⚠️ I'm still working on an earlier message and my queue for this chat is full (${error.queueLimit} waiting) — try again in a moment.`,
+        ).catch(() => undefined);
+        return;
+      }
+      throw error;
+    }
     if (reply !== undefined && reply.text !== "") {
       await this.send(chatId, reply.text);
     }

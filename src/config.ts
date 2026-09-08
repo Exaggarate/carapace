@@ -25,6 +25,11 @@ export interface GatewayConfig {
    * (bind it to localhost in that case) and doctor flags it.
    */
   apiToken: SecretValue;
+  /**
+   * Max messages that may wait in a chat's queue while a turn is in flight
+   * (1–100). Further messages are refused with a busy notice (API: HTTP 429).
+   */
+  busyQueueLimit: number;
 }
 
 export interface TelegramChannelConfig {
@@ -161,6 +166,7 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
       // hosts. Override via config or CARAPACE_GATEWAY_PORT.
       port: 8899,
       apiToken: { env: "CARAPACE_API_TOKEN" },
+      busyQueueLimit: 10,
     },
     llm: {
       baseURL: "https://api.openai.com/v1",
@@ -315,6 +321,15 @@ export function validateConfig(raw: unknown): ValidationResult {
     host: readString(gatewayRaw, "host", "gateway", errors, defaults.gateway.host),
     port: readPort(gatewayRaw, "gateway", errors, defaults.gateway.port),
     apiToken: readSecretValue(gatewayRaw, "apiToken", "gateway", errors, defaults.gateway.apiToken),
+    busyQueueLimit: readBoundedInt(
+      gatewayRaw,
+      "busyQueueLimit",
+      "gateway",
+      errors,
+      defaults.gateway.busyQueueLimit,
+      1,
+      100,
+    ),
   };
 
   const channelsRaw = asObjectOrEmpty(root.channels, "channels", errors);
@@ -422,6 +437,13 @@ function applyEnvOverrides(config: CarapaceConfig, warnings: string[]): void {
 
   const apiToken = env("API_TOKEN");
   if (apiToken !== undefined) config.gateway.apiToken = apiToken;
+
+  const busyQueueLimit = env("BUSY_QUEUE_LIMIT");
+  if (busyQueueLimit !== undefined) {
+    const parsed = Number.parseInt(busyQueueLimit, 10);
+    if (Number.isInteger(parsed) && parsed >= 1 && parsed <= 100) config.gateway.busyQueueLimit = parsed;
+    else warnings.push(`ignoring ${ENV_PREFIX}BUSY_QUEUE_LIMIT="${busyQueueLimit}" — not an integer between 1 and 100`);
+  }
 
   const llmBaseUrl = env("LLM_BASE_URL");
   if (llmBaseUrl !== undefined) config.llm.baseURL = llmBaseUrl;
