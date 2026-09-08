@@ -97,7 +97,7 @@ happens at runtime; the value never lands in config files or logs.
 ## Community wishlist → Carapace
 
 Carapace's roadmap is driven by what users actually ask for upstream. M3 turns the
-top-liked OpenClaw requests into native features, designed in rather than patched on:
+top-liked community requests from the upstream project into native features, designed in rather than patched on:
 
 | Upstream issue | 👍 | Carapace feature |
 |---|---|---|
