@@ -134,6 +134,8 @@ export class CarapaceStore {
   private readonly selectLastMessage: StatementSync;
   private readonly selectMessages: StatementSync;
   private readonly selectSessions: StatementSync;
+  private readonly deleteSessionStmt: StatementSync;
+  private readonly countMessagesStmt: StatementSync;
 
   constructor(dbPath: string) {
     if (dbPath !== ":memory:") mkdirSync(dirname(dbPath), { recursive: true });
@@ -170,6 +172,8 @@ export class CarapaceStore {
     this.selectSessions = this.db.prepare(
       "SELECT id, channel, created_at, updated_at, metadata FROM sessions ORDER BY updated_at DESC LIMIT ?",
     );
+    this.deleteSessionStmt = this.db.prepare("DELETE FROM sessions WHERE id = ?");
+    this.countMessagesStmt = this.db.prepare("SELECT COUNT(*) AS n FROM messages WHERE session_id = ?");
   }
 
   createSession(id: string, channel: string, metadata: Record<string, unknown> = {}): void {
@@ -233,6 +237,19 @@ export class CarapaceStore {
   listMessages(sessionId: string, limit: number = 200): MessageRow[] {
     const rows = this.selectMessages.all(sessionId, limit) as RawMessageRow[];
     return rows.map(toMessageRow);
+  }
+
+  /** Remove a session and (by cascade) its messages. True when a row was deleted. */
+  deleteSession(id: string): boolean {
+    const result = this.deleteSessionStmt.run(id);
+    return Number(result.changes) > 0;
+  }
+
+  /** Total persisted messages for a session. */
+  countMessages(sessionId: string): number {
+    const row = this.countMessagesStmt.get(sessionId) as { n?: number | bigint } | undefined;
+    const n = row?.n;
+    return typeof n === "bigint" ? Number(n) : typeof n === "number" ? n : 0;
   }
 
   close(): void {

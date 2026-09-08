@@ -33,6 +33,16 @@ export class SessionStore {
     return this.store.listSessions(limit);
   }
 
+  /** Delete a session (messages cascade). True when it existed. */
+  delete(sessionId: string): boolean {
+    return this.store.deleteSession(sessionId);
+  }
+
+  /** Persisted message count for a session. */
+  countMessages(sessionId: string): number {
+    return this.store.countMessages(sessionId);
+  }
+
   /** Persisted history in conversation order (oldest → newest). */
   history(sessionId: string, limit: number = 200): ChatMessage[] {
     return this.store.listMessages(sessionId, limit).map(rowToChatMessage);

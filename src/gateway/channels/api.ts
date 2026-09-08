@@ -2,13 +2,16 @@
 // Request contract (frozen at M0 so clients can build against it):
 //   POST /api/v1/messages  body: { "senderId": string, "text": string, "chatId"?: string }
 //   GET  /api/v1/channels  → channel status listing
+//   GET  /api/v1/sessions  → session listing (M2)
 // Since M1 the message handler runs the real agent loop and replies in-band.
-// Since M2 the message endpoint requires bearer auth when gateway.apiToken is set.
+// Since M2 the message and session endpoints require bearer auth when
+// gateway.apiToken is set.
 
 import { timingSafeEqual } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { respondJson, RouteTable } from "../server.js";
-import { resolveSecret, type CarapaceConfig } from "../../config.js";import type { ChannelAdapter, MessageHandler } from "./types.js";
+import { resolveSecret, type CarapaceConfig } from "../../config.js";
+import type { ChannelAdapter, MessageHandler, SessionDirectory } from "./types.js";
 
 type BodyRead = { ok: true; value: unknown } | { ok: false; status: number; error: string };
 
@@ -76,7 +79,10 @@ export class ApiChannel implements ChannelAdapter {
 
   private messageHandler: MessageHandler | null = null;
 
-  constructor(private readonly config: CarapaceConfig) {}
+  constructor(
+    private readonly config: CarapaceConfig,
+    private readonly sessions?: SessionDirectory,
+  ) {}
 
   isConfigured(): boolean {
     return this.config.channels.api.enabled;
@@ -84,7 +90,7 @@ export class ApiChannel implements ChannelAdapter {
 
   describe(): string {
     const auth = resolveSecret(this.config.gateway.apiToken) === null ? "open (no gateway.apiToken)" : "bearer-token";
-    return `enabled=${this.config.channels.api.enabled}, endpoint=POST /api/v1/messages (agent loop live), auth=${auth}`;
+    return `enabled=${this.config.channels.api.enabled}, endpoint=POST /api/v1/messages (agent loop live), GET /api/v1/sessions, auth=${auth}`;
   }
 
   onMessage(handler: MessageHandler): void {
@@ -148,6 +154,25 @@ export class ApiChannel implements ChannelAdapter {
       } catch (error) {
         respondJson(response, 500, { error: "agent_turn_failed", detail: (error as Error).message });
       }
+    });
+    routes.add("GET", "/api/v1/sessions", (request, response) => {
+      if (!requestAuthorized(this.config, request)) {
+        respondUnauthorized(response);
+        return;
+      }
+      const directory = this.sessions;
+      if (directory === undefined) {
+        respondJson(response, 503, { error: "sessions_unavailable" });
+        return;
+      }
+      const sessions = directory.list(50).map((session) => ({
+        id: session.id,
+        channel: session.channel,
+        createdAt: session.createdAt,
+        updatedAt: session.updatedAt,
+        messages: directory.countMessages(session.id),
+      }));
+      respondJson(response, 200, { sessions });
     });
     routes.add("GET", "/api/v1/channels", (_request, response) => {
       respondJson(response, 200, {

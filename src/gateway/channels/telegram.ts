@@ -10,7 +10,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { describeSecretValue, expandTilde, resolveSecret, type CarapaceConfig } from "../../config.js";
-import type { ChannelAdapter, ChannelMessage, ChannelReply, MessageHandler } from "./types.js";
+import type { ChannelAdapter, ChannelMessage, ChannelReply, MessageHandler, SessionDirectory } from "./types.js";
 
 const API_BASE = "https://api.telegram.org";
 const POLL_TIMEOUT_S = 30;
@@ -26,7 +26,7 @@ const DEFAULT_MEDIA_DIR = "~/.carapace/workspace/media";
 const WELCOME_TEXT =
   "🐢 Carapace is online.\n\n" +
   "Send me any message — text, photos, documents or voice — and I'll answer through the agent loop (tools included).\n" +
-  "Commands:\n/id — show this chat's and your sender id\n/help — this text";
+  "Commands:\n/id — show this chat's and your sender id\n/sessions — list active sessions\n/reset — wipe this chat's session history\n/help — this text";
 
 export class TelegramApiError extends Error {
   constructor(
@@ -194,10 +194,22 @@ function mediaFileName(item: TelegramMediaItem, telegramPath: string): string {
   return `doc_${item.fileUniqueId}_${sanitizeMediaFileName(original, "file.bin")}`;
 }
 
+function formatAge(ms: number): string {
+  const seconds = Math.max(1, Math.floor(ms / 1000));
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
 export interface TelegramChannelOptions {
   log?: (line: string) => void;
   /** Test seam: replaces fetch for Bot API calls and file downloads. */
   fetchImpl?: (input: string, init?: RequestInit) => Promise<Response>;
+  /** Session directory for /sessions and /reset (absent in doctor mode). */
+  sessions?: SessionDirectory;
 }
 
 export class TelegramChannel implements ChannelAdapter {
@@ -210,6 +222,7 @@ export class TelegramChannel implements ChannelAdapter {
   private readonly chatQueues = new Map<string, Promise<void>>();
   private readonly log: (line: string) => void;
   private readonly fetchImpl: (input: string, init?: RequestInit) => Promise<Response>;
+  private readonly sessions: SessionDirectory | null;
 
   constructor(
     private readonly config: CarapaceConfig,
@@ -217,6 +230,7 @@ export class TelegramChannel implements ChannelAdapter {
   ) {
     this.log = options.log ?? ((line: string) => console.log(`[telegram] ${line}`));
     this.fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
+    this.sessions = options.sessions ?? null;
   }
 
   /** Where inbound media is saved (lazy default so hand-built configs still work). */
@@ -414,6 +428,14 @@ export class TelegramChannel implements ChannelAdapter {
         await this.send(chatId, `chat id: ${chatId}\nsender id: ${senderId}${username ? `\nusername: @${username}` : ""}`);
         return;
       }
+      if (command === "/sessions") {
+        await this.send(chatId, this.sessionsText());
+        return;
+      }
+      if (command === "/reset") {
+        await this.resetSession(chatId);
+        return;
+      }
       // Unknown slash commands fall through to the agent like any other text.
     }
 
@@ -504,6 +526,36 @@ export class TelegramChannel implements ChannelAdapter {
     }
     writeFileSync(target, bytes);
     return { path: target, bytes: bytes.byteLength };
+  }
+
+  /** /reset — wipe this chat's session so the next message starts fresh. */
+  private async resetSession(chatId: string): Promise<void> {
+    if (this.sessions === null) {
+      await this.send(chatId, "Session store unavailable — /reset needs the full gateway runtime.").catch(() => undefined);
+      return;
+    }
+    const existed = this.sessions.delete(`telegram:${chatId}`);
+    await this.send(
+      chatId,
+      existed
+        ? "🧹 Session reset — this chat's history is cleared; your next message starts a fresh conversation."
+        : "🧹 Session reset — nothing to clear; your next message starts a fresh conversation.",
+    ).catch(() => undefined);
+  }
+
+  /** /sessions — the ten most recently active sessions with message counts. */
+  private sessionsText(): string {
+    const directory = this.sessions;
+    if (directory === null) {
+      return "Session store unavailable — /sessions needs the full gateway runtime.";
+    }
+    const sessions = directory.list(10);
+    if (sessions.length === 0) return "No sessions yet — send me a message to start one.";
+    const lines = sessions.map(
+      (session) =>
+        `${session.id} · ${directory.countMessages(session.id)} msg · updated ${formatAge(Date.now() - session.updatedAt)}`,
+    );
+    return ["📚 Sessions (10 most recent):", ...lines].join("\n");
   }
 
   private isSenderAllowed(senderId: string, username: string | undefined): boolean {

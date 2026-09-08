@@ -20,6 +20,20 @@ export interface MessageHandler {
   (message: ChannelMessage): Promise<ChannelReply | void>;
 }
 
+/** Narrow session-store surface channels may use (satisfied by SessionStore). */
+export interface SessionDirectory {
+  list(limit?: number): Array<{
+    id: string;
+    channel: string;
+    createdAt: number;
+    updatedAt: number;
+    metadata: string;
+  }>;
+  countMessages(sessionId: string): number;
+  /** Delete a session (messages cascade). True when it existed. */
+  delete(sessionId: string): boolean;
+}
+
 export interface ChannelAdapter {
   readonly name: string;
   /** True when the channel has everything it needs to start (config-wise). */

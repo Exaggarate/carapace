@@ -59,7 +59,10 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
     return { text: result.reply };
   };
 
-  const channels: ChannelAdapter[] = [new ApiChannel(config), new TelegramChannel(config)];
+  const channels: ChannelAdapter[] = [
+    new ApiChannel(config, agent.sessions),
+    new TelegramChannel(config, { sessions: agent.sessions }),
+  ];
   const routes = new RouteTable();
   for (const channel of channels) channel.mountRoutes?.(routes);
   for (const channel of channels) channel.onMessage(handleMessage);
