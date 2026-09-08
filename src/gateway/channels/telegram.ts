@@ -34,6 +34,9 @@ const OFFSET_KEY = "telegram:update_offset";
 const BUSINESS_CONNECTIONS_KEY = "telegram:business_connections";
 /** How long stop() waits for in-flight updates before giving up (best effort). */
 const PENDING_DRAIN_MS = 10_000;
+/** Default reaction emojis for received/done acknowledgments (#8508); "" disables. */
+const DEFAULT_ACK_EMOJI = "👀";
+const DEFAULT_DONE_EMOJI = "✅";
 
 const WELCOME_TEXT =
   "🐢 Carapace is online.\n\n" +
@@ -322,6 +325,43 @@ export class TelegramChannel implements ChannelAdapter {
     return resolveSecret(this.config.channels.telegram.botToken);
   }
 
+  /** Reaction emoji set on received messages (#8508); empty string disables. */
+  private ackEmoji(): string {
+    const raw = this.config.channels.telegram?.ackEmoji;
+    return typeof raw === "string" ? raw : DEFAULT_ACK_EMOJI;
+  }
+
+  /** Reaction emoji set when the turn for that message completed (#8508). */
+  private doneEmoji(): string {
+    const raw = this.config.channels.telegram?.doneEmoji;
+    return typeof raw === "string" ? raw : DEFAULT_DONE_EMOJI;
+  }
+
+  /**
+   * Best-effort setMessageReaction (#8508): skipped for business chats (Bot API
+   * does not support reactions there), skipped without a message id, failures
+   * only log — an ack must never break message handling.
+   */
+  private async react(
+    chatId: string,
+    messageId: number | undefined,
+    emoji: string,
+    businessConnectionId: string | null,
+  ): Promise<void> {
+    if (emoji === "" || messageId === undefined || businessConnectionId !== null) return;
+    const token = this.token();
+    if (token === null) return;
+    try {
+      await this.call(token, "setMessageReaction", {
+        chat_id: chatId,
+        message_id: messageId,
+        reaction: [{ type: "emoji", emoji }],
+      });
+    } catch (error) {
+      this.log(`reaction "${emoji}" not set: ${(error as Error).message}`);
+    }
+  }
+
   isConfigured(): boolean {
     return this.token() !== null;
   }
@@ -331,7 +371,9 @@ export class TelegramChannel implements ChannelAdapter {
     const bot = this.botUsername === null ? "" : `, bot=@${this.botUsername}`;
     return `enabled=${enabled}, botToken=${describeSecretValue(botToken)}, resolved=${
       this.isConfigured() ? "yes" : "no"
-    }, mode=long-poll, business=${this.config.channels.telegram.business ? "on" : "off"}, media=${
+    }, mode=long-poll, business=${this.config.channels.telegram.business ? "on" : "off"}, ack=${
+      this.ackEmoji() || "off"
+    }, done=${this.doneEmoji() || "off"}, media=${
       this.mediaDir()
     }${bot}`;
   }
@@ -658,6 +700,9 @@ export class TelegramChannel implements ChannelAdapter {
       return;
     }
 
+    // Received acknowledgment (#8508): a configurable reaction on the inbound message.
+    await this.react(chatId, message.message_id, this.ackEmoji(), business === null ? null : business.connectionId);
+
     const replyVia = (text: string): Promise<void> =>
       business === null ? this.send(chatId, text) : this.send(chatId, text, business.connectionId);
 
@@ -726,6 +771,8 @@ export class TelegramChannel implements ChannelAdapter {
     if (reply !== undefined && reply.text !== "") {
       await replyVia(reply.text);
     }
+    // Done acknowledgment (#8508): the turn for this message completed.
+    await this.react(chatId, message.message_id, this.doneEmoji(), business === null ? null : business.connectionId);
   }
 
   /** Download inbound attachments into mediaDir; returns the context text for the agent. */

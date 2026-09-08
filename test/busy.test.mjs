@@ -17,7 +17,7 @@ function baseConfig(busyQueueLimit, apiToken = "unit-test-token") {
     gateway: { host: "127.0.0.1", port: 0, apiToken, busyQueueLimit },
     llm: { baseURL: "http://localhost:9/v1", apiKey: "test", model: "fake", timeoutMs: 5_000 },
     channels: {
-      telegram: { enabled: false, botToken: "unit-test-token", allowedSenders: [], mediaDir: tmpdir() },
+      telegram: { enabled: false, botToken: "unit-test-token", allowedSenders: [], mediaDir: tmpdir(), steerMode: "queue" },
       api: { enabled: true },
     },
     agent: { systemPrompt: "You are a test agent.", maxToolIterations: 12 },

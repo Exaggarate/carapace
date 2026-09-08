@@ -12,7 +12,7 @@ opposite: the operator (you) owns the machine, the config, the secrets, and the 
 accounts. The gateway's job is to connect those chats to an agent loop with tools —
 reliably, transparently, and without phoning home.
 
-## Architecture at M9
+## Architecture at M10
 
 ```
 src/
@@ -68,6 +68,16 @@ queue refuses the message with `BusyTurnError`, which channels translate into a 
 notice ("queue for this chat is full") or an HTTP 429; nothing is dropped silently.
 Different chats always run concurrently. `runtime.waitUntilIdle(ms)` reports when every
 chat is drained (used by shutdown and tests).
+
+### Steer mode — mid-turn injection (#48003)
+
+The busy queue above is the classic behavior. With `channels.telegram.steerMode =
+"inject"` (the default), a message arriving while the chat's turn is still running is
+appended into the running turn's session instead of queueing a second turn — the agent
+loop re-reads history before every provider call, so the model sees the addition on its
+next iteration and folds it into the same reply. The sender gets an immediate (empty)
+acknowledgment. Slash commands always queue — they must run as their own turn, not
+steer the current one. Set `"queue"` to keep the classic serialized behavior.
 
 ### Media handling (Telegram)
 
@@ -297,6 +307,15 @@ plus optional `panel.html` and `panel.js`, served under `/ui/plugins/<name>/`:
 - Extension point only — no third-party plugin API (tool injection, lifecycle hooks)
   yet; that lands with the plugin-interface work.
 
+### Community wishlist panel (M10)
+
+`GET /api/v1/wishlist` (bearer) serves the top-liked upstream OpenClaw issues — fetched
+from the GitHub API reactions-sorted and cached in memory for one hour — merged with
+per-issue Carapace status from the in-repo tracker `docs/wishlist-status.json`
+(shipped-in-version / building / deferred). The dashboard renders it as the "Wishlist"
+tab: issue #, 👍, title, and a status chip. A failed GitHub fetch degrades to the cached
+list (or tracker-only entries), so the panel survives outages.
+
 ## Endpoints
 
 | Endpoint | Auth | Request / response |
@@ -310,6 +329,7 @@ plus optional `panel.html` and `panel.js`, served under `/ui/plugins/<name>/`:
 | GET /api/v1/status | bearer | `{version, node, uptimeSec, model, llmBaseURL, storage{path, sessions, messages}, channels[], theme}` |
 | GET /api/v1/config | bearer | full config view with every secret value redacted |
 | GET /api/v1/plugins | bearer | plugin-UI boot manifest `{plugins: [{name, title, description, version, source, hasPanel}]}` |
+| GET /api/v1/wishlist | bearer | `{source: "github\|cache\|unavailable", fetchedAt, issues: [{number, likes, title, url, status: {state, version, feature}}]}` — GitHub 👍-sorted, 1h cache, tracker merge |
 | GET /ui | — | the dashboard page; `?theme=<name>` previews a preset or the custom file |
 | GET /ui/plugins/<name>/ | — | plugin panel `panel.html` (the bare path 302-redirects here; `panel.js` served alongside) |
 | GET /api/v1/channels | — | channel status listing |
@@ -521,6 +541,26 @@ built-in tools:
 Both tools resolve only bare file names inside the memory workspace — path traversal is
 rejected. `carapace doctor` probes the memory directory for writability and reports note
 counts.
+
+## Community fixes (M10)
+
+- **spawn_subagent (#85030)** — the agent can run a focused sub-task in a sub-agent turn
+  that inherits the parent turn's tool registry by default, has its own session id
+  (`<parent>#subagent-<id>`, channel "subagent"), is capped at one nesting level, and is
+  time-boxed by `agent.subagentTimeoutSec` (5–3600, default 300). The sub-agent's final
+  answer returns to the parent as the tool result; its transcript stays inspectable as a
+  normal session.
+- **Bootstrap files (#29387)** — `~/.carapace/agents/<id>/bootstrap/*.md` load into every
+  system context, fresh each turn, sorted by agent id then file name, capped at 20,000
+  chars. See the README for the convention.
+- **Steer mode (#48003)** — see "Steer mode" under Gateway runtime semantics.
+- **Pre-reset memory flush (#45608)** — every session reset (Telegram `/reset`, the
+  dashboard reset button) first snapshots the history, distills key facts/decisions with
+  one LLM call, and appends them to the daily note under `## Reset — <sessionId>`. The
+  flush never blocks the reset; failures only log.
+- **Ack/done reaction emojis (#8508)** — `channels.telegram.ackEmoji` (default 👀) reacts
+  on received messages, `doneEmoji` (default ✅) when the turn completed. Empty string
+  disables; business chats never receive reactions; failures only log.
 
 ## Doctor checks
 

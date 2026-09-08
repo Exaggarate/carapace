@@ -12,6 +12,7 @@ import {
   type SecretValue,
 } from "../config.js";
 import { runAgentTurn, type AgentRuntime, type ChatProvider } from "../core/agent.js";
+import { flushSessionToMemory } from "../core/flush.js";
 import { MemoryStore } from "../core/memory.js";
 import { AnthropicProvider } from "../core/llm/providers/anthropic.js";
 import { FallbackProvider } from "../core/llm/providers/fallback.js";
@@ -24,7 +25,7 @@ import { CarapaceStore } from "../storage/sqlite.js";
 import { ApiChannel } from "./channels/api.js";
 import { DiscordChannel, type DiscordChannelOptions } from "./channels/discord.js";
 import { TelegramChannel, type OffsetPersistence, type TelegramChannelOptions } from "./channels/telegram.js";
-import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler } from "./channels/types.js";
+import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler, type SessionDirectory } from "./channels/types.js";
 import { mountDashboardRoutes } from "./dashboard.js";
 import { mountPluginRoutes, scanPlugins } from "./plugins.js";
 import { WishlistService } from "./wishlist.js";
@@ -214,6 +215,44 @@ function sessionKeyOf(message: ChannelMessage): string {
   return message.sessionKey ?? `${message.channel}:${message.chatId}`;
 }
 
+export interface ResetFlushDeps {
+  sessions: SessionStore;
+  provider: ChatProvider;
+  memory?: MemoryStore;
+  log?: (line: string) => void;
+}
+
+/**
+ * Session directory whose delete() runs the pre-reset memory flush (#45608):
+ * snapshot the history, distill key facts/decisions into the daily memory note
+ * (one LLM call), then drop the session. The flush never blocks or fails the
+ * reset — failures are logged, deletion proceeds either way.
+ */
+export function withResetFlush(deps: ResetFlushDeps): SessionDirectory {
+  const { sessions, provider } = deps;
+  const log = deps.log ?? ((line: string) => console.log(line));
+  return {
+    list: (limit) => sessions.list(limit),
+    countMessages: (sessionId) => sessions.countMessages(sessionId),
+    delete: (sessionId) => {
+      const history = sessions.history(sessionId);
+      const deleted = sessions.delete(sessionId);
+      const memory = deps.memory;
+      if (deleted && memory !== undefined) {
+        flushSessionToMemory({ provider, memory, sessionId, history })
+          .then((outcome) => {
+            if (outcome.flushed) log(`[memory] pre-reset flush → ${outcome.path}`);
+            else log(`[memory] pre-reset flush skipped for ${sessionId}: ${outcome.reason}`);
+          })
+          .catch((error: unknown) => {
+            console.warn(`[memory] pre-reset flush failed for ${sessionId}: ${(error as Error).message}`);
+          });
+      }
+      return deleted;
+    },
+  };
+}
+
 export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
   const { config } = options;
   const store = options.store ?? new CarapaceStore(config.storage.path);
@@ -241,10 +280,18 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
     return created;
   };
 
+  // Pre-reset memory flush (#45608): channels and the dashboard see a session
+  // directory whose delete() flushes key facts into the daily note first.
+  const deletableSessions = withResetFlush({
+    sessions: agent.sessions,
+    provider: agent.provider,
+    memory: agent.memory,
+  });
+
   const channels: ChannelAdapter[] = [
     new ApiChannel(config, agent.sessions),
     new TelegramChannel(config, {
-      sessions: agent.sessions,
+      sessions: deletableSessions,
       offsetStore: channelStateAdapter(store),
       ...options.telegramOptions,
     }),
@@ -316,6 +363,13 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
   // is refused with BusyTurnError — channels translate that into a notice
   // (Telegram) or HTTP 429 (API). Nothing is dropped silently.
   const busyQueueLimit = config.gateway.busyQueueLimit ?? 10;
+  // Steer mode (#48003): with the default "inject", a message arriving while a
+  // turn for the same chat is running is appended into the running turn's session
+  // (the loop re-reads history before every provider call) instead of queueing.
+  // channels.telegram.steerMode = "inject" (default) | "queue". Slash commands
+  // always queue — they must run as their own turn, not steer the current one.
+  const steerMode = config.channels.telegram?.steerMode === "queue" ? "queue" : "inject";
+  const inFlight = new Set<string>();
   const queues = new Map<string, PendingTurn[]>();
   const pumping = new Set<string>();
   const idleWaiters: Array<() => void> = [];
@@ -332,16 +386,27 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
         }
         return;
       }
+      inFlight.add(key);
       try {
         next.resolve(await runTurn(next.message));
       } catch (error: unknown) {
         next.reject(error);
+      } finally {
+        inFlight.delete(key);
       }
     }
   };
 
   const handleMessage = (message: ChannelMessage): Promise<ChannelReply> => {
     const key = sessionKeyOf(message);
+    // Steer (#48003): mid-turn additions join the running turn's context and the
+    // caller gets an empty reply — channels send nothing for "" and the turn in
+    // flight picks the message up on its next provider call.
+    if (steerMode === "inject" && inFlight.has(key) && !message.text.startsWith("/")) {
+      agent.sessions.getOrCreate(key, message.channel);
+      agent.sessions.appendUser(key, message.text);
+      return Promise.resolve({ text: "" });
+    }
     return new Promise<ChannelReply>((resolve, reject) => {
       let queue = queues.get(key);
       if (queue === undefined) {
@@ -383,7 +448,7 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
   // endpoints, backed by the same store, sessions, and bearer-auth model.
   mountDashboardRoutes(routes, {
     config,
-    sessions: agent.sessions,
+    sessions: deletableSessions,
     store,
     channels,
     wishlist: options.wishlist,

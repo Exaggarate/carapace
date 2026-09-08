@@ -2,6 +2,12 @@
 // Tools expose name/description/JSON-schema params plus an execute() the loop calls;
 // toSpecs() renders them for OpenAI-compatible function calling.
 
+import type { CarapaceConfig } from "../../config.js";
+import type { ChatProvider } from "../agent.js";
+import type { MemoryStore } from "../memory.js";
+import type { SessionStore } from "../session.js";
+import type { SkillRegistry } from "../skills.js";
+
 export interface ToolParameterSchema {
   type: "string" | "number" | "boolean";
   description?: string;
@@ -13,11 +19,25 @@ export interface ToolInputSchema {
   required: string[];
 }
 
+/** Handle for spawning sub-agent turns (#85030): the running turn's live runtime. */
+export interface SubagentHandle {
+  provider: ChatProvider;
+  tools: ToolRegistry;
+  sessions: SessionStore;
+  config: CarapaceConfig;
+  skills?: SkillRegistry;
+  memory?: MemoryStore;
+  /** Nesting depth of the CURRENT turn: 0 = top-level agent turn, 1 = spawned sub-turn. */
+  depth: number;
+}
+
 export interface ToolContext {
   sessionId: string;
   workdir: string;
   /** Workspace root holding memory/ + MEMORY.md (memory tools, M9); absent = disabled. */
   memoryWorkspace?: string;
+  /** Present inside an agent loop — spawn_subagent inherits the turn's runtime (#85030). */
+  subagent?: SubagentHandle;
 }
 
 export interface ToolResult {
@@ -30,6 +50,12 @@ export interface ToolDefinition {
   name: string;
   description: string;
   inputSchema: ToolInputSchema;
+  /**
+   * Optional per-tool execution cap in ms — the loop's default tool timeout otherwise
+   * applies. Long-running wrappers (spawn_subagent, #85030) raise it; the turn's own
+   * deadline always shrinks the effective cap.
+   */
+  timeoutMs?: number;
   execute(input: Record<string, unknown>, context: ToolContext): Promise<ToolResult>;
 }
 

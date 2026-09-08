@@ -9,6 +9,7 @@ import { fileToolsDir, fileToolDefinition, loadFileToolDefs, runSetupOnce } from
 import { createExecTool } from "./exec.js";
 import { createFilesTool } from "./files.js";
 import { createMemoryReadTool, createMemoryWriteTool } from "./memory.js";
+import { createSpawnSubagentTool } from "./subagent.js";
 import { createWebFetchTool } from "./web-fetch.js";
 
 /**
@@ -32,6 +33,9 @@ export function createBuiltinToolRegistry(config: CarapaceConfig): ToolRegistry 
   // runtime has no memory workspace injected into ToolContext.
   registry.register(createMemoryReadTool());
   registry.register(createMemoryWriteTool());
+  // Sub-agent spawning (#85030): executes only when the loop attaches a runtime
+  // handle to the ToolContext — pure registry builds (doctor, tests) just carry it.
+  registry.register(createSpawnSubagentTool());
   return registry;
 }
 

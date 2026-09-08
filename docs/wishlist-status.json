@@ -4,17 +4,17 @@
   "updated": "2026-09-08",
   "issues": {
     "68596": { "state": "shipped", "version": "0.3.0", "feature": "configurable turn budget + stall watchdog (llm.turnTimeoutMs + llm.watchdogTimeoutSec)" },
-    "85030": { "state": "building", "feature": "spawn_subagent tool — sub-turns inherit the parent tool registry (max depth 1, time-boxed)" },
-    "8508": { "state": "building", "feature": "configurable ack/done reaction emojis (channels.telegram.ackEmoji / doneEmoji)" },
-    "29387": { "state": "building", "feature": "agents/*/bootstrap/*.md loaded into every system context" },
+    "85030": { "state": "shipped", "version": "0.10.0", "feature": "spawn_subagent tool — sub-turns inherit the parent tool registry (max depth 1, time-boxed)" },
+    "8508": { "state": "shipped", "version": "0.10.0", "feature": "configurable ack/done reaction emojis (channels.telegram.ackEmoji / doneEmoji)" },
+    "29387": { "state": "shipped", "version": "0.10.0", "feature": "agents/*/bootstrap/*.md loaded into every system context" },
     "27445": { "state": "shipped", "version": "0.3.0", "feature": "agent.announceTarget completion routing" },
     "20786": { "state": "shipped", "version": "0.4.0", "feature": "Telegram Business support (business_message / business_connection)" },
-    "48003": { "state": "building", "feature": "steer mode — mid-turn message injection (channels.telegram.steerMode)" },
+    "48003": { "state": "shipped", "version": "0.10.0", "feature": "steer mode — mid-turn message injection (channels.telegram.steerMode)" },
     "28300": { "state": "shipped", "version": "0.5.0", "feature": "dashboard themes + custom theme files (ui.theme / ui.themeFile)" },
     "38309": { "state": "shipped", "version": "0.2.0", "feature": "SecretRef resolution in every config surface" },
     "66944": { "state": "shipped", "version": "0.5.0", "feature": "plugin-UI foundation (plugin panels under /ui)" },
     "81271": { "state": "shipped", "version": "0.3.0", "feature": "per-sender routing — tool allowlists + model overrides" },
-    "45608": { "state": "building", "feature": "pre-reset memory flush — sessions are summarized into the daily note before reset" },
+    "45608": { "state": "shipped", "version": "0.10.0", "feature": "pre-reset memory flush — sessions are summarized into the daily note before reset" },
     "6615": { "state": "shipped", "version": "0.2.0", "feature": "exec approvals denylist (tools.exec.denylist)" }
   }
 }

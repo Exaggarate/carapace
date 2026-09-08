@@ -83,7 +83,7 @@ test("non-matching senders keep the default provider and the full toolset", asyn
   const reply = await runtime.handleMessage(MSG({ senderId: "someone-else", chatId: "other" }));
   assert.equal(reply.text, "reply-from-default");
   assert.equal(overrideCalls.length, 0);
-  assert.deepEqual(defaultCalls[0].tools, ["exec", "files", "memory_read", "memory_write", "web_fetch"]);
+  assert.deepEqual(defaultCalls[0].tools, ["exec", "files", "memory_read", "memory_write", "spawn_subagent", "web_fetch"]);
   runtime.close();
 });
 

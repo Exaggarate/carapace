@@ -4,7 +4,7 @@ An independent, multi-channel AI agent gateway. Carapace runs your own assistant
 own hardware and talks to your own chats — Telegram, Discord, raw HTTP — more later.
 Every line here is written for this project: not a fork, not a rebrand.
 
-## Status: M7 (skills + multi-provider models)
+## Status: M10 (community wishlist panel + native issue fixes)
 
 Working today:
 
@@ -130,12 +130,16 @@ see docs/index.md, section "Deployment with pm2".
 | channels.telegram.allowedSenders | [] (everyone) | — |
 | channels.telegram.mediaDir | ~/.carapace/workspace/media | CARAPACE_MEDIA_DIR |
 | channels.telegram.business | true | — |
+| channels.telegram.steerMode | inject (inject · queue) | — |
+| channels.telegram.ackEmoji | 👀 (empty = off) | — |
+| channels.telegram.doneEmoji | ✅ (empty = off) | — |
 | channels.api.enabled | true | CARAPACE_API_ENABLED |
 | channels.discord.enabled | false | CARAPACE_DISCORD_ENABLED |
 | channels.discord.botToken | `{"env": "CARAPACE_DISCORD_TOKEN"}` | CARAPACE_DISCORD_TOKEN |
 | agent.systemPrompt | Carapace default | — |
 | agent.maxToolIterations | 12 (1–64) | — |
 | agent.announceTarget | null (reply to origin) | CARAPACE_ANNOUNCE_TARGET (`channel:chatId`) |
+| agent.subagentTimeoutSec | 300 (5–3600) | — |
 | senders | [] (no per-sender routing) | — |
 | tools.allowedRoots | [~/.carapace/workspace] | — |
 | tools.exec.timeoutMs | 30000 (1000–300000) | — |
@@ -182,22 +186,37 @@ other bots' messages plus webhook chatter; long replies are chunked at Discord's
 
 ## Community wishlist → Carapace
 
-Carapace's roadmap is driven by what users actually ask for upstream. M3 through M5 turn the
-top-liked community requests from the upstream project into native features, designed in rather than patched on:
+Carapace's roadmap is driven by what users actually ask for upstream. Top-liked community
+requests become native features, designed in rather than patched on. The dashboard's
+"Community wishlist" panel (`GET /api/v1/wishlist`) renders the live GitHub 👍 ranking
+(1h-cached fetch) merged with per-issue status from `docs/wishlist-status.json`.
 
 | Upstream issue | 👍 | Carapace feature |
 |---|---|---|
 | #68596 configurable streaming watchdog | 8 | `llm.turnTimeoutMs` + `llm.watchdogTimeoutSec` — stalled turns abort cleanly with a user-visible error |
-| #27445 announceTarget for completion routing | 5 | `agent.announceTarget` — full replies route to a chosen `channel:chatId`; the origin chat gets a short notice |
 | #20786 Telegram Business Bot support | 7 | `business_message`/`business_connection` handled natively — persisted connections, separate business sessions, replies on behalf of the business account |
-| #80213 tool/skill setup hooks | 4 | `~/.carapace/tools/*.json` declare exec-backed tools with a once-only `setup` argv (marker-tracked, logged) |
+| #85030 subagent tool injection | 6 | `spawn_subagent` tool — sub-turns inherit the parent's tool registry, run in their own session, max depth 1, time-boxed by `agent.subagentTimeoutSec` |
+| #8508 configurable ack/done reactions | 6 | `channels.telegram.ackEmoji` / `doneEmoji` — 👀 on receipt, ✅ on completion, empty string disables |
+| #29387 agentDir bootstrap files | 5 | `~/.carapace/agents/*/bootstrap/*.md` loaded into every system context, fresh each turn |
+| #27445 announceTarget for completion routing | 5 | `agent.announceTarget` — full replies route to a chosen `channel:chatId`; the origin chat gets a short notice |
 | #28300 theme customization system | 5 | `ui.theme` presets (dark / light / lobster-red / carapace-amber) + a custom `~/.carapace/theme.css` stylesheet inlined by `GET /ui`, doctor-validated |
+| #80213 tool/skill setup hooks | 4 | `~/.carapace/tools/*.json` declare exec-backed tools with a once-only `setup` argv (marker-tracked, logged) |
 | #66944 plugin UI extension system | 4 | `plugins/` convention — `plugin.json` + `panel.html`/`panel.js` served under `/ui/plugins/<name>/`, manifest at `GET /api/v1/plugins`, `system-info` example ships |
+| #48003 steer mode | 4 | `channels.telegram.steerMode = "inject" \| "queue"` (default inject) — mid-turn messages join the running turn's context |
+| #45608 pre-reset memory flush | 4 | before a session reset, one LLM call distills key facts/decisions into the daily memory note |
 | #81271 per-sender exec node routing | 3 | `senders[]` routing table — per-sender tool allowlists + model overrides (single-node adaptation) |
 
-M8 candidates: automations/scheduler (recurring + timed jobs); M9: a memory system.
-Beyond: WhatsApp channels, a third-party plugin interface (tool injection + lifecycle),
-and richer dashboard write actions.
+### Bootstrap files (#29387)
+
+Drop markdown files into `~/.carapace/agents/<id>/bootstrap/` and every agent turn picks
+them up — sorted by agent id then file name, injected fresh each turn under a "Bootstrap
+files" section, capped at 20,000 chars. Non-markdown files are ignored, missing
+directories are a no-op, and unreadable files never break turns.
+
+M8 shipped the automations/scheduler (recurring + timed jobs); M9 shipped the plain-file
+memory system; M10 shipped the wishlist panel + the fixes above. Beyond: WhatsApp
+channels, a third-party plugin interface (tool injection + lifecycle), and richer
+dashboard write actions.
 
 ## API endpoints
 
@@ -213,6 +232,7 @@ and richer dashboard write actions.
 | GET /api/v1/status | bearer | version, uptime, model, storage counts, channel states |
 | GET /api/v1/config | bearer | full config with every secret value redacted |
 | GET /api/v1/plugins | bearer | loaded plugin-UI manifests |
+| GET /api/v1/wishlist | bearer | top-liked upstream issues + Carapace status (1h-cached GitHub fetch merged with `docs/wishlist-status.json`) |
 | GET /ui/plugins/<name>/ | — | plugin panel page (`panel.js` served alongside; extension point #66944) |
 | GET /api/v1/channels | — | channel status |
 

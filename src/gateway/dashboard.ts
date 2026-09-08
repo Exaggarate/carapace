@@ -139,6 +139,9 @@ export function redactedConfigView(config: CarapaceConfig): Record<string, unkno
         allowedSenders: config.channels.telegram.allowedSenders,
         mediaDir: config.channels.telegram.mediaDir,
         business: config.channels.telegram.business,
+        steerMode: config.channels.telegram?.steerMode ?? "inject",
+        ackEmoji: config.channels.telegram?.ackEmoji ?? "",
+        doneEmoji: config.channels.telegram?.doneEmoji ?? "",
       },
       api: { enabled: config.channels.api.enabled },
     },
@@ -146,6 +149,7 @@ export function redactedConfigView(config: CarapaceConfig): Record<string, unkno
       systemPrompt: config.agent.systemPrompt,
       maxToolIterations: config.agent.maxToolIterations,
       announceTarget: config.agent.announceTarget,
+      subagentTimeoutSec: config.agent.subagentTimeoutSec ?? 300,
     },
     tools: {
       allowedRoots: config.tools.allowedRoots,

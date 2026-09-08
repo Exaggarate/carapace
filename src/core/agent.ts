@@ -3,6 +3,7 @@
 // Context comes from the SessionStore; tools execute through the ToolRegistry.
 
 import { carapaceHome, type CarapaceConfig } from "../config.js";
+import { loadBootstrapFiles } from "./bootstrap.js";
 import type { MemoryStore } from "./memory.js";
 import type { SessionStore } from "./session.js";
 import type { SkillRegistry } from "./skills.js";
@@ -90,6 +91,10 @@ export interface AgentTurnInput {
   tools?: ToolRegistry;
   /** Per-turn provider override (per-sender model override, #81271). */
   provider?: ChatProvider;
+  /** Sub-agent nesting depth (#85030): 0 = top-level turn, 1 = spawned sub-turn. */
+  depth?: number;
+  /** Per-turn turn-budget override (ms) — spawn_subagent time-boxes its sub-turn. */
+  turnTimeoutMs?: number;
 }
 
 export type AgentTurnStopReason = "final_answer" | "max_iterations" | "error";
@@ -148,8 +153,8 @@ export async function executeToolCall(
 
   const stepCapMs =
     deadlineMs === undefined
-      ? TOOL_TIMEOUT_MS
-      : Math.min(TOOL_TIMEOUT_MS, Math.max(0, deadlineMs - Date.now()));
+      ? tool.timeoutMs ?? TOOL_TIMEOUT_MS
+      : Math.min(tool.timeoutMs ?? TOOL_TIMEOUT_MS, Math.max(0, deadlineMs - Date.now()));
   if (stepCapMs <= 0) {
     return { ok: false, output: `turn budget exhausted — tool "${call.name}" was not run (llm.turnTimeoutMs)` };
   }
@@ -249,11 +254,15 @@ export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime)
   let systemPrompt = config.agent.systemPrompt;
   if (skillsBlock !== null) systemPrompt += `\n\n${skillsBlock}`;
   if (memoryBlock !== null) systemPrompt += `\n\n${memoryBlock}`;
+  // Bootstrap files (#29387): ~/.carapace/agents/*/bootstrap/*.md join every turn's
+  // system context; loaded fresh so operator edits land without a restart.
+  const bootstrapBlock = loadBootstrapFiles(carapaceHome()).block;
+  if (bootstrapBlock !== null) systemPrompt += `\n\n${bootstrapBlock}`;
 
   // Turn budget + stall watchdog (#68596): llm.turnTimeoutMs bounds the whole turn,
   // llm.watchdogTimeoutSec aborts a single provider call that never completes.
   // Hand-built configs (tests) may omit llm — absent values disable both limits.
-  const turnTimeoutMs = config.llm?.turnTimeoutMs ?? 0;
+  const turnTimeoutMs = input.turnTimeoutMs ?? config.llm?.turnTimeoutMs ?? 0;
   const watchdogTimeoutSec = config.llm?.watchdogTimeoutSec ?? 0;
   const turnDeadline = turnTimeoutMs > 0 ? Date.now() + turnTimeoutMs : null;
   const watchdogText =
@@ -298,7 +307,22 @@ export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime)
 
     if (completion.toolCalls.length > 0) {
       sessions.appendAssistant(sessionId, completion.text, completion.toolCalls);
-      const context: ToolContext = { sessionId, workdir, memoryWorkspace: runtime.memory?.workspaceDir };
+      const context: ToolContext = {
+        sessionId,
+        workdir,
+        memoryWorkspace: runtime.memory?.workspaceDir,
+        // spawn_subagent (#85030): the sub-turn inherits this turn's tool registry,
+        // provider, and memory; depth enforces the one-level nesting cap.
+        subagent: {
+          provider,
+          tools,
+          sessions,
+          config,
+          skills: runtime.skills,
+          memory: runtime.memory,
+          depth: input.depth ?? 0,
+        },
+      };
       for (const call of completion.toolCalls) {
         const result = await executeToolCall(tools, call, context, turnDeadline ?? undefined);
         toolCallsExecuted += 1;

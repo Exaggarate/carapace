@@ -46,6 +46,17 @@ export interface TelegramChannelConfig {
    * Telegram Business settings, so the toggle defaults on.
    */
   business: boolean;
+  /**
+   * Steer mode (#48003): what happens to messages that arrive while a turn for the
+   * same chat is still running. "inject" appends them into the running turn's
+   * context (the loop re-reads history before every provider call); "queue" keeps
+   * the classic serialized queue. Default "inject".
+   */
+  steerMode?: "inject" | "queue";
+  /** Reaction emoji set on received messages (#8508). Empty string disables. */
+  ackEmoji?: string;
+  /** Reaction emoji set when the turn for that message completed (#8508). */
+  doneEmoji?: string;
 }
 
 export interface ApiChannelConfig {
@@ -93,6 +104,11 @@ n   * chat, the full reply is delivered to this channel:chatId and the origin ch
    * receives a short routing notice instead. Null = reply to the origin chat.
    */
   announceTarget: AnnounceTargetConfig | null;
+  /**
+   * Time box (seconds, 5–3600) for one spawned sub-agent turn (spawn_subagent,
+   * #85030). Default 300.
+   */
+  subagentTimeoutSec?: number;
 }
 
 /** OpenAI-compatible chat-completions endpoint (OpenAI, Ollama, vLLM, OpenRouter, …). */
@@ -323,6 +339,9 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
         allowedSenders: [],
         mediaDir: join(dir, "workspace", "media"),
         business: true,
+        steerMode: "inject" as const,
+        ackEmoji: "👀",
+        doneEmoji: "✅",
       },
       api: { enabled: true },
       discord: { enabled: false, botToken: { env: "CARAPACE_DISCORD_TOKEN" } },
@@ -331,6 +350,7 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
       systemPrompt: "You are Carapace, a helpful personal agent running on the owner's own hardware.",
       maxToolIterations: 12,
       announceTarget: null,
+      subagentTimeoutSec: 300,
     },
     senders: [],
     tools: {
@@ -380,6 +400,13 @@ function readString(
     return fallback;
   }
   return raw;
+}
+
+/** Steer mode (#48003): "inject" | "queue" — anything else falls back to the default. */
+function readSteerMode(obj: Record<string, unknown>, fallback: "inject" | "queue"): "inject" | "queue" {
+  const raw = obj.steerMode;
+  if (raw === undefined) return fallback;
+  return raw === "queue" ? "queue" : raw === "inject" ? "inject" : fallback;
 }
 
 function readBoolean(
@@ -564,6 +591,24 @@ export function validateConfig(raw: unknown): ValidationResult {
         readString(telegramRaw, "mediaDir", "channels.telegram", errors, defaults.channels.telegram.mediaDir),
       ),
       business: readBoolean(telegramRaw, "business", "channels.telegram", errors, defaults.channels.telegram.business),
+      steerMode: readSteerMode(
+        telegramRaw,
+        defaults.channels.telegram.steerMode ?? "inject",
+      ),
+      ackEmoji: readString(
+        telegramRaw,
+        "ackEmoji",
+        "channels.telegram",
+        errors,
+        defaults.channels.telegram.ackEmoji ?? "👀",
+      ),
+      doneEmoji: readString(
+        telegramRaw,
+        "doneEmoji",
+        "channels.telegram",
+        errors,
+        defaults.channels.telegram.doneEmoji ?? "✅",
+      ),
     },
     api: { enabled: readBoolean(apiRaw, "enabled", "channels.api", errors, defaults.channels.api.enabled) },
     discord: {
@@ -723,6 +768,15 @@ export function validateConfig(raw: unknown): ValidationResult {
       64,
     ),
     announceTarget: readAnnounceTarget(agentRaw, errors, defaults.agent.announceTarget),
+    subagentTimeoutSec: readBoundedInt(
+      agentRaw,
+      "subagentTimeoutSec",
+      "agent",
+      errors,
+      defaults.agent.subagentTimeoutSec ?? 300,
+      5,
+      3600,
+    ),
   };
 
   // Per-sender routing table (#81271). Invalid entries are dropped with an error —
