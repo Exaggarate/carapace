@@ -27,6 +27,7 @@ import { TelegramChannel, type OffsetPersistence, type TelegramChannelOptions } 
 import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler } from "./channels/types.js";
 import { mountDashboardRoutes } from "./dashboard.js";
 import { mountPluginRoutes, scanPlugins } from "./plugins.js";
+import { WishlistService } from "./wishlist.js";
 import { RouteTable } from "./server.js";
 import { Scheduler } from "./scheduler.js";
 
@@ -46,6 +47,8 @@ export interface RuntimeOptions {
   skills?: SkillRegistry;
   /** Memory store (M9); defaults to ~/.carapace/workspace (memory/ + MEMORY.md). */
   memory?: MemoryStore;
+  /** Test seam: inject the wishlist service (mock GitHub fetch + status file) for panel tests. */
+  wishlist?: WishlistService;
 }
 
 /** A message waiting for its chat's turn, with the promise it must settle. */
@@ -383,6 +386,7 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
     sessions: agent.sessions,
     store,
     channels,
+    wishlist: options.wishlist,
   });
   // Plugin-UI foundation (#66944): manifest endpoint + one exact-match route set
   // per loaded plugin; broken manifests surface as warnings, never as crashes.

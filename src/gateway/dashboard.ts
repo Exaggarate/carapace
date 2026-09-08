@@ -13,6 +13,7 @@ import type { CarapaceStore } from "../storage/sqlite.js";
 import { respondUnauthorized, readJsonBody, requestAuthorized } from "./channels/api.js";
 import type { ChannelAdapter, SessionDirectory } from "./channels/types.js";
 import { respondJson, type RouteTable } from "./server.js";
+import { WishlistService } from "./wishlist.js";
 import { VERSION } from "../version.js";
 
 /** Built-in theme presets; a preset is one :root block of CSS custom properties. */
@@ -164,6 +165,8 @@ export interface DashboardDeps {
   sessions: SessionDirectory;
   store: Pick<CarapaceStore, "getSession" | "listRecentMessages" | "countSessions" | "countAllMessages">;
   channels: Array<Pick<ChannelAdapter, "name" | "isConfigured" | "describe">>;
+  /** Community wishlist service (M10); defaults to the bundled tracker + live GitHub. */
+  wishlist?: WishlistService;
 }
 
 /** Minimal query-string reader (the ambient URL type carries no searchParams). */
@@ -191,6 +194,7 @@ const DASHBOARD_STARTED_AT = Date.now();
  * gateway.apiToken is configured — exactly like the API channel (#28300). */
 export function mountDashboardRoutes(routes: RouteTable, deps: DashboardDeps): void {
   const { config } = deps;
+  const wishlist = deps.wishlist ?? new WishlistService();
 
   routes.add("GET", "/ui", (request, response) => {
     const override = queryValue(request.url, "theme");
@@ -230,6 +234,16 @@ export function mountDashboardRoutes(routes: RouteTable, deps: DashboardDeps): v
       return;
     }
     respondJson(response, 200, redactedConfigView(config));
+  });
+
+  // Community wishlist (M10): top-liked upstream issues (GitHub, 1h-cached) merged
+  // with the docs/wishlist-status.json tracker. Same bearer-auth as every /api/v1 route.
+  routes.add("GET", "/api/v1/wishlist", async (request, response) => {
+    if (!requestAuthorized(config, request)) {
+      respondUnauthorized(response);
+      return;
+    }
+    respondJson(response, 200, await wishlist.list());
   });
 
   // Recent messages of one session, oldest → newest. GET keeps the route table
@@ -427,6 +441,7 @@ const APP_JS = `
     if (name === "messages" && state.sessionId) { loadMessages(); }
     if (name === "config") { loadConfigView(); }
     if (name === "plugins") { loadPlugins(); }
+    if (name === "wishlist") { loadWishlist(); }
   }
 
   function kvRow(key, value) {
@@ -632,6 +647,68 @@ const APP_JS = `
     });
   }
 
+  function mkLink(text, href) {
+    var a = document.createElement("a");
+    a.textContent = text;
+    a.href = href || "#";
+    a.target = "_blank";
+    a.rel = "noopener";
+    return a;
+  }
+
+  function wishlistChip(issue) {
+    var chip = el("span", "chip" + (issue.status && issue.status.state === "shipped" ? " ok" : ""));
+    if (!issue.status) { chip.textContent = "untracked"; }
+    else if (issue.status.state === "shipped") { chip.textContent = "shipped" + (issue.status.version ? " in v" + issue.status.version : ""); }
+    else { chip.textContent = issue.status.state; }
+    return chip;
+  }
+
+  function loadWishlist() {
+    var box = byId("wishlist-body");
+    return getJson("/api/v1/wishlist").then(function (data) {
+      clear(box); box.className = "";
+      var issues = data.issues || [];
+      var meta = el("div", "note");
+      var where = data.source === "github" ? "live from GitHub" : data.source === "cache" ? "cached" : "GitHub unavailable";
+      var when = data.fetchedAt ? "updated " + fmtTime(data.fetchedAt) : "not fetched yet";
+      meta.textContent = where + " \\u2014 " + when + (data.note ? " \\u2014 " + data.note : "");
+      box.appendChild(meta);
+      if (issues.length === 0) {
+        box.appendChild(el("div", "note", "no wishlist issues loaded yet \\u2014 hit Refresh to retry the GitHub fetch"));
+        return;
+      }
+      var table = document.createElement("table");
+      var head = document.createElement("tr");
+      ["#", "\\u{1F44D}", "Issue", "Carapace status"].forEach(function (label) {
+        var th = document.createElement("th");
+        th.textContent = label;
+        head.appendChild(th);
+      });
+      table.appendChild(head);
+      issues.forEach(function (issue) {
+        var row = document.createElement("tr");
+        var tdNumber = document.createElement("td");
+        tdNumber.appendChild(mkLink("#" + issue.number, issue.url));
+        row.appendChild(tdNumber);
+        var tdLikes = document.createElement("td");
+        tdLikes.textContent = issue.likes ? String(issue.likes) : "";
+        row.appendChild(tdLikes);
+        var tdTitle = document.createElement("td");
+        tdTitle.appendChild(mkLink(issue.title, issue.url));
+        if (issue.status && issue.status.feature) { tdTitle.appendChild(el("div", "note", issue.status.feature)); }
+        row.appendChild(tdTitle);
+        var tdStatus = document.createElement("td");
+        tdStatus.appendChild(wishlistChip(issue));
+        row.appendChild(tdStatus);
+        table.appendChild(row);
+      });
+      box.appendChild(table);
+    }).catch(function (err) {
+      box.className = "error"; clear(box); box.textContent = "wishlist: " + errText(err);
+    });
+  }
+
   byId("token-save").addEventListener("click", function () {
     var input = byId("token-input");
     saveToken(input.value.trim());
@@ -645,6 +722,7 @@ const APP_JS = `
     select(current);
   });
   byId("status-refresh").addEventListener("click", function () { loadStatus(); });
+  byId("wishlist-refresh").addEventListener("click", function () { loadWishlist(); });
   byId("msg-refresh").addEventListener("click", function () { loadMessages(); });
   byId("chat-send").addEventListener("click", sendChat);
   byId("chat-input").addEventListener("keydown", function (event) {
@@ -706,6 +784,7 @@ ${DASHBOARD_CSS}
     <button data-tab="chat">Chat</button>
     <button data-tab="config">Config</button>
     <button data-tab="plugins">Plugins</button>
+    <button data-tab="wishlist">Wishlist</button>
   </nav>
   <div class="spacer"></div>
   <label class="theme-label" for="theme">theme</label>
@@ -764,6 +843,12 @@ ${options}
     <div class="card">
       <h2>Plugins</h2>
       <div id="plugins-body" class="note">loading\u2026</div>
+    </div>
+  </section>
+  <section class="panel" id="panel-wishlist">
+    <div class="card">
+      <h2>Community wishlist <button class="action" id="wishlist-refresh">Refresh</button></h2>
+      <div id="wishlist-body" class="note">loading\u2026</div>
     </div>
   </section>
 </main>
