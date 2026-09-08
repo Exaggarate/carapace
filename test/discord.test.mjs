@@ -8,7 +8,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
 
-import { DiscordChannel, splitDiscordContent } from "../dist/gateway/channels/discord.js";
+import { DiscordChannel, splitDiscordContent, probeDiscordToken } from "../dist/gateway/channels/discord.js";
 import { BusyTurnError } from "../dist/gateway/channels/types.js";
 import { buildRuntime } from "../dist/gateway/runtime.js";
 import { startGatewayServer } from "../dist/gateway/server.js";
@@ -178,6 +178,36 @@ test("config schema accepts channels.discord and defaults to disabled + CARAPACE
 
   const bad = validateConfig({ channels: { discord: { enabled: "yes" } } });
   assert.ok(bad.errors.some((e) => e.includes("channels.discord.enabled")));
+});
+
+test("probeDiscordToken reports ok / rejected-token / unreachable without leaking the token", async () => {
+  const ok = await probeDiscordToken("tok", "https://mock.rest/api", async (url, init) => {
+    assert.equal(url, "https://mock.rest/api/users/@me");
+    assert.equal(init?.headers?.authorization, "Bot tok");
+    return {
+      status: 200,
+      statusText: "OK",
+      headers: { get: () => null },
+      json: async () => ({ username: "carapace-bot" }),
+    };
+  });
+  assert.deepEqual(ok, { ok: true, fatal: false, detail: "gateway reachable; authenticated as carapace-bot" });
+
+  const rejected = await probeDiscordToken("tok", "https://mock.rest/api", async () => ({
+    status: 401,
+    statusText: "Unauthorized",
+    headers: { get: () => null },
+    json: async () => ({ message: "401: Unauthorized" }),
+  }));
+  assert.equal(rejected.ok, false);
+  assert.equal(rejected.fatal, true);
+
+  const unreachable = await probeDiscordToken("tok", "https://mock.rest/api", async () => {
+    throw new Error("connect ECONNREFUSED");
+  });
+  assert.equal(unreachable.ok, false);
+  assert.equal(unreachable.fatal, false);
+  assert.match(unreachable.detail, /unreachable/);
 });
 
 test("identifies after hello (token + intents) and start() resolves on READY", async () => {

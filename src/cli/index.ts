@@ -16,6 +16,7 @@ import {
   type LoadedConfig,
 } from "../config.js";
 import { ApiChannel } from "../gateway/channels/api.js";
+import { DiscordChannel, probeDiscordToken } from "../gateway/channels/discord.js";
 import { TelegramChannel } from "../gateway/channels/telegram.js";
 import { customThemeFilePath, validateThemeCss } from "../gateway/dashboard.js";
 import { scanPlugins } from "../gateway/plugins.js";
@@ -232,7 +233,29 @@ async function commandDoctor(): Promise<number> {
       status: config.channels.api.enabled ? "ok" : "warn",
       detail: api.describe(),
     });
-    if (!config.channels.telegram.enabled && !config.channels.api.enabled) {
+    const discord = new DiscordChannel(config);
+    results.push({
+      name: "channel:discord",
+      status: config.channels.discord.enabled
+        ? discord.isConfigured()
+          ? "ok"
+          : "warn"
+        : "ok",
+      detail: discord.describe(),
+    });
+    // Gateway reachability probe — only when enabled + token present; a disabled
+    // channel must never touch the network. A rejected token (401) FAILs (it is a
+    // config problem), unreachable gateways only WARN (network, not config).
+    if (config.channels.discord.enabled && discord.isConfigured()) {
+      const token = resolveSecret(config.channels.discord.botToken) ?? "";
+      const probe = await probeDiscordToken(token);
+      results.push({
+        name: "channel:discord-gateway",
+        status: probe.ok ? "ok" : probe.fatal ? "fail" : "warn",
+        detail: probe.detail,
+      });
+    }
+    if (!config.channels.telegram.enabled && !config.channels.api.enabled && !config.channels.discord.enabled) {
       results.push({
         name: "channels",
         status: "warn",
@@ -242,7 +265,7 @@ async function commandDoctor(): Promise<number> {
 
     if (config.agent.announceTarget !== null) {
       const target = config.agent.announceTarget;
-      const pushable = target.channel === "telegram";
+      const pushable = target.channel === "telegram" || target.channel === "discord";
       results.push({
         name: "agent:announceTarget",
         status: pushable ? "ok" : "warn",

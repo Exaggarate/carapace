@@ -118,6 +118,45 @@ export function splitDiscordContent(text: string, limit: number = MAX_CONTENT_CH
   return chunks.length > 0 ? chunks : [text.slice(0, limit)];
 }
 
+export interface DiscordProbeResult {
+  ok: boolean;
+  /** True when the failure is a definite config problem (token rejected). */
+  fatal: boolean;
+  detail: string;
+}
+
+/**
+ * Doctor probe: who does this token authenticate as (REST GET /users/@me)?
+ * Verifies gateway/REST reachability without opening a websocket. Never logs the token.
+ */
+export async function probeDiscordToken(
+  token: string,
+  restBase: string = DEFAULT_REST_BASE,
+  fetchImpl: typeof fetch = fetch,
+): Promise<DiscordProbeResult> {
+  try {
+    const response = await fetchImpl(`${restBase}/users/@me`, {
+      headers: { authorization: `Bot ${token}` },
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (response.status === 200) {
+      const user = (await response.json().catch(() => ({}))) as { username?: unknown };
+      const name = typeof user.username === "string" ? user.username : "bot";
+      return { ok: true, fatal: false, detail: `gateway reachable; authenticated as ${name}` };
+    }
+    if (response.status === 401) {
+      return {
+        ok: false,
+        fatal: true,
+        detail: "token rejected (401) — create a fresh bot token in the developer portal",
+      };
+    }
+    return { ok: false, fatal: false, detail: `gateway returned ${response.status} ${response.statusText}` };
+  } catch (error) {
+    return { ok: false, fatal: false, detail: `gateway unreachable: ${(error as Error).message}` };
+  }
+}
+
 /** Serialized REST message queue with minimal rate-limit handling (headers + one 429 retry). */
 class DiscordRestSender {
   private chain: Promise<unknown> = Promise.resolve();
