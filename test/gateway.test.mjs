@@ -62,3 +62,19 @@ test("gateway serves /health and answers api messages through the agent loop", a
     runtime.close();
   }
 });
+
+test("health reports healthMetadata — degraded channel state is visible (#108435)", async () => {
+  const handle = await startGatewayServer({
+    host: "127.0.0.1",
+    port: 0,
+    healthMetadata: () => ({ channels: { telegram: { state: "degraded", detail: "boom" } } }),
+  });
+  try {
+    const response = await fetch(`http://127.0.0.1:${handle.port}/health`);
+    const payload = await response.json();
+    assert.equal(payload.ok, true);
+    assert.deepEqual(payload.channels, { telegram: { state: "degraded", detail: "boom" } });
+  } finally {
+    await handle.stop();
+  }
+});

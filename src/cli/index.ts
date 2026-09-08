@@ -23,7 +23,7 @@ import { customThemeFilePath, validateThemeCss } from "../gateway/dashboard.js";
 import { markdownToTelegramHtml, TELEGRAM_MESSAGE_LIMIT, validateTelegramMarkdown } from "../gateway/format.js";
 import { scanPlugins } from "../gateway/plugins.js";
 import { buildRuntime, describeProviderChain } from "../gateway/runtime.js";
-import { startGatewayServer } from "../gateway/server.js";
+import { startGatewayServer, type GatewayHandle } from "../gateway/server.js";
 import { createBuiltinToolRegistry } from "../core/tools/builtins/index.js";
 import { fileToolsDir, loadFileToolDefs } from "../core/tools/custom.js";
 import { probeProviderEndpoint, type ProviderProbeResult } from "../core/llm.js";
@@ -88,11 +88,26 @@ async function commandGateway(): Promise<number> {
     );
   });
   const runtime = buildRuntime({ config: loaded.config, skills });
-  const handle = await startGatewayServer({
-    host: loaded.config.gateway.host,
-    port: loaded.config.gateway.port,
-    routes: runtime.routes,
-  });
+  // Per-channel boot state, surfaced on GET /health (#108435).
+  const channelHealth = new Map<string, { state: string; detail: string }>();
+  let handle: GatewayHandle;
+  try {
+    handle = await startGatewayServer({
+      host: loaded.config.gateway.host,
+      port: loaded.config.gateway.port,
+      routes: runtime.routes,
+      healthMetadata: () => ({ channels: Object.fromEntries(channelHealth) }),
+    });
+  } catch (error) {
+    if ((error as { code?: string }).code === "EADDRINUSE") {
+      console.error(
+        `gateway failed to start: port ${loaded.config.gateway.port} is already in use — ` +
+          "stop the other instance (or unrelated process) or change gateway.port",
+      );
+      return 1;
+    }
+    throw error;
+  }
 
   console.log(`🐢 carapace v${VERSION}`);
   console.log(`   gateway → http://${handle.host}:${handle.port} (health: GET /health)`);
@@ -103,18 +118,47 @@ async function commandGateway(): Promise<number> {
   if (resolveSecret(loaded.config.llm.apiKey) === null) {
     console.warn("   llm     → API key unresolved — agent turns will fail until llm.apiKey is set");
   }
+  // Hardened boot (#108435): a failing channel never blocks the gateway —
+  // bounded retries ride out transient network hiccups, and a channel that
+  // stays down leaves the gateway in a visible degraded state (boot summary
+  // + GET /health) instead of a crash.
+  const CHANNEL_START_ATTEMPTS = 3;
+  const CHANNEL_START_RETRY_MS = 2_000;
   for (const channel of runtime.channels) {
     if (!channel.isConfigured()) {
+      channelHealth.set(channel.name, { state: "skipped", detail: "not configured" });
       console.log(`   channel → ${channel.name}: not configured, skipped`);
       continue;
     }
-    try {
-      await channel.start();
-      console.log(`   channel → ${channel.name}: running`);
-    } catch (error) {
-      console.error(`   channel → ${channel.name}: failed to start (${(error as Error).message})`);
+    for (let attempt = 1; attempt <= CHANNEL_START_ATTEMPTS; attempt += 1) {
+      try {
+        await channel.start();
+        channelHealth.set(channel.name, { state: "running", detail: "started" });
+        console.log(`   channel → ${channel.name}: running${attempt > 1 ? ` (attempt ${attempt})` : ""}`);
+        break;
+      } catch (error) {
+        const detail = (error as Error).message;
+        const last = attempt === CHANNEL_START_ATTEMPTS;
+        channelHealth.set(channel.name, { state: last ? "degraded" : "retrying", detail });
+        console.error(
+          `   channel → ${channel.name}: start attempt ${attempt}/${CHANNEL_START_ATTEMPTS} failed (${detail})`,
+        );
+        if (last) {
+          console.error(`   channel → ${channel.name}: DEGRADED — the gateway runs without it; restart to retry`);
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, CHANNEL_START_RETRY_MS));
+        }
+      }
     }
   }
+  const degraded = [...channelHealth.entries()]
+    .filter(([, health]) => health.state === "degraded")
+    .map(([name]) => name);
+  console.log(
+    degraded.length === 0
+      ? "   boot → all channels healthy"
+      : `   boot → degraded channels: ${degraded.join(", ")}`,
+  );
   // Automations (M8): boot catch-up (missed one-shots fire once) + the tick loop.
   if (runtime.scheduler !== undefined) {
     runtime.scheduler.start();

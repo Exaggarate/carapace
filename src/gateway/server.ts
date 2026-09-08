@@ -37,6 +37,12 @@ export interface GatewayServerOptions {
   host: string;
   port: number;
   routes?: RouteTable;
+  /**
+   * Extra fields merged into every GET /health payload (evaluated per request).
+   * Hardened boot (#108435): the CLI reports per-channel state here so a
+   * degraded channel is visible to monitors, not only in boot logs.
+   */
+  healthMetadata?: () => Record<string, unknown>;
 }
 
 export interface GatewayHandle {
@@ -61,6 +67,7 @@ export async function startGatewayServer(options: GatewayServerOptions): Promise
         version: VERSION,
         uptimeSec: Math.floor((Date.now() - startedAt) / 1000),
         node: process.version,
+        ...(options.healthMetadata?.() ?? {}),
       });
       return;
     }
