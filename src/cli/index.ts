@@ -28,6 +28,7 @@ import { createBuiltinToolRegistry } from "../core/tools/builtins/index.js";
 import { fileToolsDir, loadFileToolDefs } from "../core/tools/custom.js";
 import { probeProviderEndpoint, type ProviderProbeResult } from "../core/llm.js";
 import { nextRunMs, parseSchedule, ScheduleError } from "../core/schedule.js";
+import { DREAM_JOB_NAME, parseDreamChat } from "../core/dream.js";
 import { MemoryStore, todayIsoDate } from "../core/memory.js";
 import { personaForChannel } from "../core/persona.js";
 import { carapaceSkillsDir, loadSkillsFromDir, runSkillSetup, skillSetupState, SkillRegistry } from "../core/skills.js";
@@ -118,6 +119,10 @@ async function commandGateway(): Promise<number> {
   if (runtime.scheduler !== undefined) {
     runtime.scheduler.start();
     console.log(`   automations → ${runtime.scheduler.describe()} (tick ${loaded.config.automations?.tickMs ?? 30_000}ms)`);
+  }
+  // Memory dreaming (#67413): surface the managed job's boot sync when it changed.
+  if (runtime.dreamNotice !== undefined && runtime.dreamNotice !== null) {
+    console.log(`   dreaming → memory consolidation job ${runtime.dreamNotice}`);
   }
   console.log("   ready — press ctrl+c to stop");
 
@@ -537,6 +542,45 @@ async function commandDoctor(): Promise<number> {
         name: "memory",
         status: "fail",
         detail: `memory check failed: ${(error as Error).message}`,
+      });
+    }
+
+    // Memory dreaming (#67413): config + managed job state, read-only — doctor
+    // never fires the dream or runs hooks, it only reports what it sees.
+    const dream = config.memory?.dreaming;
+    if (dream?.enabled === true) {
+      const target = parseDreamChat(dream.chat);
+      let jobDetail: string;
+      try {
+        const dreamStore = new CarapaceStore(config.storage.path);
+        try {
+          const job = dreamStore.findAutomationByName(DREAM_JOB_NAME);
+          jobDetail =
+            job === null
+              ? "managed job missing — recreated on the next gateway boot"
+              : `managed job next run ${job.nextRun === null ? "unscheduled" : new Date(job.nextRun).toISOString()}`;
+        } finally {
+          dreamStore.close();
+        }
+      } catch (error) {
+        jobDetail = `could not inspect the managed job: ${(error as Error).message}`;
+      }
+      results.push({
+        name: "memory:dreaming",
+        status: target?.channel === "api" ? "warn" : "ok",
+        detail:
+          `enabled — cron "${dream.scheduleCron}", ` +
+          `${target === null ? "headless (no summary chat)" : `summary → ${target.channel}:${target.chatId}`}, ` +
+          jobDetail +
+          (target?.channel === "api"
+            ? " — the api channel cannot receive pushes; drop the chat or use telegram/discord"
+            : ""),
+      });
+    } else {
+      results.push({
+        name: "memory:dreaming",
+        status: "ok",
+        detail: "disabled (memory.dreaming.enabled) — daily notes stay the raw log",
       });
     }
   }

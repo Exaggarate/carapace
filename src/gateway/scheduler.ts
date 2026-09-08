@@ -206,9 +206,14 @@ export class Scheduler {
     }
   }
 
-  /** Run the agent turn for a claimed job, then deliver the reply to its chat. */
+  /** Run the agent turn for a claimed job, then deliver the reply to its chat.
+   * Headless jobs (empty channel/chatId — e.g. memory dreaming, #67413) skip
+   * delivery: the turn itself did the work, the summary lives in its session. */
   private async executeJob(job: AutomationRow): Promise<JobOutcome> {
-    this.log(`automation "${job.name}" (${job.kind} ${job.spec}) firing → ${job.channel}:${job.chatId}`);
+    this.log(
+      `automation "${job.name}" (${job.kind} ${job.spec}) firing → ` +
+        (job.channel === "" ? "(headless)" : `${job.channel}:${job.chatId}`),
+    );
 
     let reply = "";
     let error: string | null = null;
@@ -229,7 +234,7 @@ export class Scheduler {
       error = `agent turn failed: ${(turnError as Error).message}`;
     }
 
-    if (error === null) {
+    if (error === null && job.channel !== "" && job.chatId !== "") {
       const adapter = this.options.channels.find((candidate) => candidate.name === job.channel);
       if (adapter === undefined) {
         error = `unknown channel "${job.channel}"`;

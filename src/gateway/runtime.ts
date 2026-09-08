@@ -14,6 +14,7 @@ import {
 import { runAgentTurn, type AgentRuntime, type ChatProvider } from "../core/agent.js";
 import { personaForChannel } from "../core/persona.js";
 import { flushSessionToMemory } from "../core/flush.js";
+import { upsertDreamJob } from "../core/dream.js";
 import { MemoryStore } from "../core/memory.js";
 import { AnthropicProvider } from "../core/llm/providers/anthropic.js";
 import { FallbackProvider } from "../core/llm/providers/fallback.js";
@@ -73,6 +74,8 @@ export interface GatewayRuntime {
   close(): void;
   /** Automation scheduler (M8): built here, started/stopped by the CLI. Undefined when disabled. */
   scheduler?: Scheduler;
+  /** Memory dreaming (#67413): boot sync result of the managed job — null when disabled/unchanged. */
+  dreamNotice?: string | null;
 }
 
 const OPENAI_DEFAULT_BASE_URL = "https://api.openai.com/v1";
@@ -476,6 +479,19 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
   mountPluginRoutes(routes, config, pluginScan);
   for (const channel of channels) channel.onMessage(handleMessage);
 
+  // Memory dreaming (#67413): keep the managed consolidation job in sync with
+  // config. It runs through the durable scheduler like any other automation.
+  const dream = config.memory?.dreaming;
+  let dreamNotice: string | null = null;
+  if (dream?.enabled === true) {
+    try {
+      const outcome = upsertDreamJob(store, dream);
+      dreamNotice = outcome.created ? "created" : outcome.updated ? "updated" : null;
+    } catch (error) {
+      dreamNotice = `error: ${(error as Error).message}`;
+    }
+  }
+
   return {
     agent,
     channels,
@@ -490,6 +506,7 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
       channels,
       tickMs: config.automations?.tickMs ?? 30_000,
     }),
+    dreamNotice,
     close: () => store.close(),
   };
 }

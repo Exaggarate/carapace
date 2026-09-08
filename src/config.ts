@@ -8,6 +8,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
+import { parseDreamChat } from "./core/dream.js";
+import { parseSchedule } from "./core/schedule.js";
+
 export const ENV_PREFIX = "CARAPACE_";
 
 /** A pointer to a secret stored outside the config file. */
@@ -231,6 +234,25 @@ export interface AutomationsConfig {
   tickMs: number;
 }
 
+/**
+ * Memory dreaming (#67413): scheduled consolidation of the daily-note log into
+ * MEMORY.md, implemented as a managed scheduler job the gateway keeps in sync.
+ */
+export interface MemoryDreamingConfig {
+  /** Master switch; default false — the managed job exists only when enabled. */
+  enabled: boolean;
+  /** 5-field crontab (server-local) for the consolidation run; default "0 4 * * *". */
+  scheduleCron: string;
+  /** Optional CHANNEL:CHATID that receives the dream turn's one-line summary. */
+  chat: string;
+}
+
+/** Memory system settings; runtime consumers must tolerate hand-built configs without it. */
+export interface MemoryConfig {
+  /** Present when configured; defaults (disabled) apply when absent. */
+  dreaming?: MemoryDreamingConfig;
+}
+
 export interface CarapaceConfig {
   gateway: GatewayConfig;
   llm: LlmConfig;
@@ -244,6 +266,8 @@ export interface CarapaceConfig {
   ui: UiConfig;
   /** Scheduled jobs (M8); runtime consumers must tolerate hand-built configs without it. */
   automations: AutomationsConfig;
+  /** Memory settings (#67413 dreaming); runtime consumers must tolerate hand-built configs without it. */
+  memory?: MemoryConfig;
 }
 
 export interface LoadedConfig {
@@ -382,6 +406,13 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
     automations: {
       enabled: true,
       tickMs: 30_000,
+    },
+    memory: {
+      dreaming: {
+        enabled: false,
+        scheduleCron: "0 4 * * *",
+        chat: "",
+      },
     },
   };
 }
@@ -573,6 +604,7 @@ export function validateConfig(raw: unknown): ValidationResult {
     "senders",
     "ui",
     "automations",
+    "memory",
   ]);
   for (const key of Object.keys(root)) {
     if (!knownSections.has(key)) errors.push(`unknown top-level section "${key}"`);
@@ -927,7 +959,57 @@ export function validateConfig(raw: unknown): ValidationResult {
     ),
   };
 
-  return { config: { gateway, llm, channels, agent, tools, senders, storage, ui, automations }, errors };
+  // Memory dreaming (#67413): schedule + optional summary target. The whole
+  // section is optional — absent means dreaming stays disabled.
+  let memory: MemoryConfig | undefined;
+  if (root.memory !== undefined) {
+    const memoryRaw = asObjectOrEmpty(root.memory, "memory", errors);
+    const dreamingRaw = asObjectOrEmpty(memoryRaw.dreaming, "memory.dreaming", errors);
+    const dreamingEnabled = readBoolean(
+      dreamingRaw,
+      "enabled",
+      "memory.dreaming",
+      errors,
+      defaults.memory?.dreaming?.enabled ?? false,
+    );
+    const dreamingCron = readString(
+      dreamingRaw,
+      "scheduleCron",
+      "memory.dreaming",
+      errors,
+      defaults.memory?.dreaming?.scheduleCron ?? "0 4 * * *",
+    );
+    // chat tolerates "" (the bootstrap default round-trips through config.json) —
+    // empty/absent means a headless dream run with no summary push.
+    const chatRaw = dreamingRaw.chat;
+    let dreamingChat: string | undefined;
+    if (chatRaw === undefined || (typeof chatRaw === "string" && chatRaw.trim() === "")) {
+      dreamingChat = undefined;
+    } else if (typeof chatRaw === "string") {
+      dreamingChat = chatRaw;
+    } else {
+      errors.push("memory.dreaming.chat must be a non-empty string when present");
+    }
+    if (dreamingEnabled) {
+      try {
+        parseSchedule("cron", dreamingCron);
+      } catch (error) {
+        errors.push(`memory.dreaming.scheduleCron: ${(error as Error).message}`);
+      }
+      if (dreamingChat !== undefined && parseDreamChat(dreamingChat) === null) {
+        errors.push('memory.dreaming.chat must be "CHANNEL:CHATID" (e.g. "telegram:12345") or absent for headless runs');
+      }
+    }
+    memory = {
+      dreaming: {
+        enabled: dreamingEnabled,
+        scheduleCron: dreamingCron,
+        chat: dreamingChat ?? "",
+      },
+    };
+  }
+
+  return { config: { gateway, llm, channels, agent, tools, senders, storage, ui, automations, memory }, errors };
 }
 
 function parseEnvBoolean(name: string, raw: string, warnings: string[]): boolean | null {
