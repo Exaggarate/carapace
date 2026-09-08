@@ -44,6 +44,20 @@ declare module "node:fs" {
   export function writeFileSync(path: string, data: string | Uint8Array, encoding?: string): void;
   export function unlinkSync(path: string): void;
   export function readdirSync(path: string): string[];
+  export interface Dirent {
+    name: string;
+    isDirectory(): boolean;
+    isFile(): boolean;
+  }
+  export function readdirSync(path: string, options: { withFileTypes: true }): Dirent[];
+  export interface FSWatcher {
+    close(): void;
+  }
+  export function watch(
+    path: string,
+    options: { persistent?: boolean; recursive?: boolean },
+    listener?: () => void,
+  ): FSWatcher;
   export function realpathSync(path: string): string;
   export interface Stats {
     isDirectory(): boolean;

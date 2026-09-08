@@ -4,6 +4,7 @@
 
 import { carapaceHome, type CarapaceConfig } from "../config.js";
 import type { SessionStore } from "./session.js";
+import type { SkillRegistry } from "./skills.js";
 import type { ToolContext, ToolRegistry, ToolResult, ToolSpec } from "./tools/registry.js";
 
 export type ChatRole = "system" | "user" | "assistant" | "tool";
@@ -71,6 +72,8 @@ export interface AgentRuntime {
   provider: ChatProvider;
   tools: ToolRegistry;
   sessions: SessionStore;
+  /** Installed skill playbooks (M7); their index is appended to the system prompt. */
+  skills?: SkillRegistry;
 }
 
 export interface AgentTurnInput {
@@ -235,6 +238,12 @@ export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime)
   const tools = input.tools ?? runtime.tools;
   const maxIterations = config.agent.maxToolIterations;
 
+  // Skills (M7): append the registry's "available skills" block to the system prompt
+  // so the agent knows which playbooks exist and where each SKILL.md lives.
+  const skillsBlock = runtime.skills?.systemContextBlock() ?? null;
+  const systemPrompt =
+    skillsBlock === null ? config.agent.systemPrompt : `${config.agent.systemPrompt}\n\n${skillsBlock}`;
+
   // Turn budget + stall watchdog (#68596): llm.turnTimeoutMs bounds the whole turn,
   // llm.watchdogTimeoutSec aborts a single provider call that never completes.
   // Hand-built configs (tests) may omit llm — absent values disable both limits.
@@ -271,7 +280,7 @@ export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime)
       completion = await completeWithWatchdog(
         provider,
         {
-          messages: sessions.buildContext(sessionId, config.agent.systemPrompt),
+          messages: sessions.buildContext(sessionId, systemPrompt),
           tools: tools.toSpecs(),
         },
         limits,

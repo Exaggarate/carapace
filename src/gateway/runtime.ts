@@ -4,6 +4,7 @@
 import { resolveSecret, resolveSenderRoute, type CarapaceConfig } from "../config.js";
 import { runAgentTurn, type AgentRuntime, type ChatProvider } from "../core/agent.js";
 import { OpenAiCompatibleProvider } from "../core/llm.js";
+import type { SkillRegistry } from "../core/skills.js";
 import { createBuiltinTools } from "../core/tools/builtins/index.js";
 import { SessionStore } from "../core/session.js";
 import { CarapaceStore } from "../storage/sqlite.js";
@@ -27,6 +28,8 @@ export interface RuntimeOptions {
   discordOptions?: DiscordChannelOptions;
   /** Test seam: provider factory for per-sender model overrides (#81271). */
   providerForModel?: (model: string) => ChatProvider;
+  /** Skills registry (M7): its index is appended to every turn's system prompt. */
+  skills?: SkillRegistry;
 }
 
 /** A message waiting for its chat's turn, with the promise it must settle. */
@@ -80,6 +83,7 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
     provider,
     tools: createBuiltinTools(config),
     sessions: new SessionStore(store),
+    skills: options.skills,
   };
 
   // Per-sender model overrides (#81271): providers are built lazily per model

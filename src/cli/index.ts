@@ -24,15 +24,17 @@ import { buildRuntime } from "../gateway/runtime.js";
 import { startGatewayServer } from "../gateway/server.js";
 import { createBuiltinToolRegistry } from "../core/tools/builtins/index.js";
 import { fileToolsDir, loadFileToolDefs } from "../core/tools/custom.js";
+import { carapaceSkillsDir, loadSkillsFromDir, SkillRegistry } from "../core/skills.js";
 import { CarapaceStore } from "../storage/sqlite.js";
 import { VERSION } from "../version.js";
 
 const USAGE = `carapace v${VERSION} — independent multi-channel agent gateway
 
 Usage:
-  carapace gateway    start the gateway (LLM + tools + channels + HTTP server)
-  carapace doctor     check node, config, directories, storage, llm, tools, channels
-  carapace models     show the configured model/provider
+  carapace gateway    start the gateway (LLM + tools + skills + channels + HTTP server)
+  carapace doctor     check node, config, directories, storage, llm, tools, skills, channels
+  carapace models     show the configured model/provider chain
+  carapace skills     skills list | skills path <name> — installed skill playbooks
   carapace version    print the version
   carapace help       show this help
 
@@ -67,7 +69,16 @@ async function commandGateway(): Promise<number> {
   }
   for (const warning of loaded.warnings) console.warn(`warning: ${warning}`);
 
-  const runtime = buildRuntime({ config: loaded.config });
+  const skillsRoot = carapaceSkillsDir();
+  mkdirSync(skillsRoot, { recursive: true });
+  const skills = new SkillRegistry(skillsRoot);
+  skills.watch((result) => {
+    console.log(
+      `[skills] reloaded — ${result.skills.length} skill(s) from ${skillsRoot}` +
+        (result.issues.length > 0 ? ` — ${result.issues.join("; ")}` : ""),
+    );
+  });
+  const runtime = buildRuntime({ config: loaded.config, skills });
   const handle = await startGatewayServer({
     host: loaded.config.gateway.host,
     port: loaded.config.gateway.port,
@@ -78,6 +89,7 @@ async function commandGateway(): Promise<number> {
   console.log(`   gateway → http://${handle.host}:${handle.port} (health: GET /health)`);
   console.log(`   ui      → http://${handle.host}:${handle.port}/ui (theme: ${loaded.config.ui.theme})`);
   console.log(`   storage → ${loaded.config.storage.path}`);
+  console.log(`   skills  → ${skills.list().length} skill(s) from ${skillsRoot}`);
   console.log(`   llm     → ${loaded.config.llm.model} @ ${loaded.config.llm.baseURL}`);
   if (resolveSecret(loaded.config.llm.apiKey) === null) {
     console.warn("   llm     → API key unresolved — agent turns will fail until llm.apiKey is set");
@@ -117,6 +129,7 @@ async function commandGateway(): Promise<number> {
       if (!drained) console.warn("shutdown grace elapsed with turns still active — closing anyway");
       await handle.stop();
       runtime.close();
+      skills.close();
       console.log("shutdown complete");
       process.exit(0);
     })();
@@ -375,6 +388,18 @@ async function commandDoctor(): Promise<number> {
         `${fileTools.defs.length} file-defined tool(s) in ${fileToolsDir()}` +
         (fileTools.issues.length > 0 ? ` — ${fileTools.issues.join("; ")}` : ""),
     });
+
+    // Skills (M7): count + parse problems. A broken skill only warns — a bad file
+    // must never take the gateway down, and doctor says exactly what to fix.
+    const skillsRoot = carapaceSkillsDir();
+    const skillScan = loadSkillsFromDir(skillsRoot);
+    results.push({
+      name: "skills",
+      status: skillScan.issues.length > 0 ? "warn" : "ok",
+      detail:
+        `${skillScan.skills.length} skill(s) in ${skillsRoot}` +
+        (skillScan.issues.length > 0 ? ` — ${skillScan.issues.join("; ")}` : ""),
+    });
   }
 
   const failed = results.filter((r) => r.status === "fail");
@@ -408,6 +433,42 @@ function commandModels(): number {
   return 0;
 }
 
+function commandSkills(argv: string[]): number {
+  const sub = argv[0] ?? "list";
+  const root = carapaceSkillsDir();
+  if (sub === "list") {
+    const result = loadSkillsFromDir(root);
+    if (result.skills.length === 0 && result.issues.length === 0) {
+      console.log(`no skills installed — create ${root}/<name>/SKILL.md (name + description frontmatter, then instructions)`);
+      console.log("example playbooks ship in the repo under skills/examples/ — copy one across to install it");
+      return 0;
+    }
+    console.log(`skills (${result.skills.length}) from ${root}:`);
+    for (const skill of result.skills) {
+      console.log(`  - ${skill.name} — ${skill.description}`);
+      console.log(`      ${skill.path}`);
+    }
+    for (const issue of result.issues) console.warn(`  ! ${issue}`);
+    return 0;
+  }
+  if (sub === "path") {
+    const name = argv[1] ?? "";
+    if (name === "") {
+      console.error("usage: carapace skills path <name>");
+      return 2;
+    }
+    const skill = loadSkillsFromDir(root).skills.find((candidate) => candidate.name === name);
+    if (skill === undefined) {
+      console.error(`unknown skill "${name}" — see installed skills: carapace skills list`);
+      return 1;
+    }
+    console.log(skill.path);
+    return 0;
+  }
+  console.error(`unknown skills subcommand: "${sub}" (expected "list" or "path")`);
+  return 2;
+}
+
 function commandVersion(): number {
   console.log(`carapace ${VERSION} (node ${process.version})`);
   return 0;
@@ -422,6 +483,8 @@ export async function main(argv: string[]): Promise<number> {
       return await commandDoctor();
     case "models":
       return commandModels();
+    case "skills":
+      return commandSkills(argv.slice(1));
     case "version":
     case "--version":
       return commandVersion();
