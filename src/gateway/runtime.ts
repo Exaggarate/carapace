@@ -1,9 +1,19 @@
 // Gateway runtime assembly: config → provider + tools + session store + channels.
 // Shared by the CLI, tests, and future entry points so there is exactly one wiring.
 
-import { resolveSecret, resolveSenderRoute, type CarapaceConfig } from "../config.js";
+import {
+  describeSecretValue,
+  resolveSecret,
+  resolveSenderRoute,
+  type CarapaceConfig,
+  type LlmProviderKind,
+  type SecretValue,
+} from "../config.js";
 import { runAgentTurn, type AgentRuntime, type ChatProvider } from "../core/agent.js";
-import { OpenAiCompatibleProvider } from "../core/llm.js";
+import { AnthropicProvider } from "../core/llm/providers/anthropic.js";
+import { FallbackProvider } from "../core/llm/providers/fallback.js";
+import { OllamaLocalProvider } from "../core/llm/providers/ollama.js";
+import { OpenAiProvider } from "../core/llm/providers/openai.js";
 import type { SkillRegistry } from "../core/skills.js";
 import { createBuiltinTools } from "../core/tools/builtins/index.js";
 import { SessionStore } from "../core/session.js";
@@ -51,12 +61,131 @@ export interface GatewayRuntime {
   close(): void;
 }
 
+const OPENAI_DEFAULT_BASE_URL = "https://api.openai.com/v1";
+const ANTHROPIC_DEFAULT_BASE_URL = "https://api.anthropic.com";
+const OLLAMA_DEFAULT_BASE_URL = "http://127.0.0.1:11434/v1";
+
+/** One fully-resolved provider entry (primary or fallback) before instantiation. */
+interface ProviderEntrySpec {
+  kind: LlmProviderKind;
+  model: string;
+  baseURL: string;
+  /** null = the provider needs no credential (local Ollama). */
+  apiKey: SecretValue | null;
+  maxTokens?: number;
+}
+
+/** Resolve the serving chain: the primary provider first, then llm.fallbacks[] in order. */
+function providerEntriesFromConfig(config: CarapaceConfig, model?: string): ProviderEntrySpec[] {
+  const kind = config.llm.provider ?? "openai";
+  const entries: ProviderEntrySpec[] = [];
+  if (kind === "anthropic") {
+    const anthropic = config.llm.anthropic;
+    entries.push({
+      kind,
+      model: model ?? anthropic?.model ?? config.llm.model,
+      baseURL: anthropic?.baseURL ?? ANTHROPIC_DEFAULT_BASE_URL,
+      apiKey: anthropic?.apiKey ?? { env: "CARAPACE_ANTHROPIC_API_KEY" },
+      maxTokens: anthropic?.maxTokens,
+    });
+  } else if (kind === "ollama") {
+    const ollama = config.llm.ollama;
+    entries.push({
+      kind,
+      model: model ?? ollama?.model ?? config.llm.model,
+      baseURL: ollama?.baseURL ?? OLLAMA_DEFAULT_BASE_URL,
+      apiKey: ollama?.apiKey ?? "ollama",
+    });
+  } else {
+    // Default and backward compatibility: top-level baseURL/apiKey/model are the
+    // OpenAI-compatible provider.
+    entries.push({
+      kind: "openai",
+      model: model ?? config.llm.model,
+      baseURL: config.llm.baseURL,
+      apiKey: config.llm.apiKey,
+    });
+  }
+  for (const fallback of config.llm.fallbacks ?? []) {
+    entries.push({
+      kind: fallback.provider,
+      model: fallback.model,
+      baseURL:
+        fallback.baseURL ??
+        (fallback.provider === "anthropic"
+          ? ANTHROPIC_DEFAULT_BASE_URL
+          : fallback.provider === "ollama"
+            ? OLLAMA_DEFAULT_BASE_URL
+            : OPENAI_DEFAULT_BASE_URL),
+      apiKey: fallback.apiKey ?? (fallback.provider === "ollama" ? "ollama" : null),
+      maxTokens: fallback.maxTokens,
+    });
+  }
+  return entries;
+}
+
+function providerFromSpec(spec: ProviderEntrySpec, timeoutMs: number): ChatProvider {
+  const apiKey = spec.apiKey === null ? "" : (resolveSecret(spec.apiKey) ?? "");
+  switch (spec.kind) {
+    case "anthropic":
+      return new AnthropicProvider({
+        apiKey,
+        model: spec.model,
+        baseURL: spec.baseURL,
+        maxTokens: spec.maxTokens,
+        timeoutMs,
+      });
+    case "ollama":
+      return new OllamaLocalProvider({
+        baseURL: spec.baseURL,
+        apiKey: apiKey === "" ? undefined : apiKey,
+        model: spec.model,
+        timeoutMs,
+      });
+    default:
+      return new OpenAiProvider({ baseURL: spec.baseURL, apiKey, model: spec.model, timeoutMs });
+  }
+}
+
+export function buildProviderChain(config: CarapaceConfig, model?: string): ChatProvider[] {
+  const timeoutMs = config.llm.timeoutMs;
+  return providerEntriesFromConfig(config, model).map((spec) => providerFromSpec(spec, timeoutMs));
+}
+
+/**
+ * The provider (chain) for agent turns: the primary provider per llm.provider, or a
+ * FallbackProvider when llm.fallbacks[] is configured. Per-sender model overrides
+ * (#81271) swap the model on the primary provider kind; fallback entries keep
+ * their own models.
+ */
 export function createProviderFromConfig(config: CarapaceConfig, model?: string): ChatProvider {
-  return new OpenAiCompatibleProvider({
-    baseURL: config.llm.baseURL,
-    apiKey: resolveSecret(config.llm.apiKey) ?? "",
-    model: model ?? config.llm.model,
-    timeoutMs: config.llm.timeoutMs,
+  const chain = buildProviderChain(config, model);
+  const [primary] = chain;
+  if (chain.length === 1 && primary !== undefined) return primary;
+  return new FallbackProvider(chain);
+}
+
+/** Human-safe description of one chain entry (for `carapace models` and doctor). */
+export interface ProviderChainEntry {
+  kind: LlmProviderKind;
+  model: string;
+  endpoint: string;
+  keyDescribe: string;
+  keyResolved: boolean;
+  probeApiKey: string | null;
+}
+
+export function describeProviderChain(config: CarapaceConfig, model?: string): ProviderChainEntry[] {
+  return providerEntriesFromConfig(config, model).map((spec) => {
+    const resolved = spec.apiKey === null ? "" : resolveSecret(spec.apiKey);
+    return {
+      kind: spec.kind,
+      model: spec.model,
+      endpoint: spec.baseURL,
+      keyDescribe: spec.apiKey === null ? "none (local)" : describeSecretValue(spec.apiKey),
+      keyResolved: spec.apiKey !== null && resolved !== null,
+      probeApiKey: resolved,
+    };
   });
 }
 

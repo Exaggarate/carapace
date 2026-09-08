@@ -9,7 +9,6 @@ import { dirname, join } from "node:path";
 import {
   carapaceHome,
   ConfigError,
-  describeSecretValue,
   loadConfig,
   resolveSecret,
   type CarapaceConfig,
@@ -20,10 +19,11 @@ import { DiscordChannel, probeDiscordToken } from "../gateway/channels/discord.j
 import { TelegramChannel } from "../gateway/channels/telegram.js";
 import { customThemeFilePath, validateThemeCss } from "../gateway/dashboard.js";
 import { scanPlugins } from "../gateway/plugins.js";
-import { buildRuntime } from "../gateway/runtime.js";
+import { buildRuntime, describeProviderChain } from "../gateway/runtime.js";
 import { startGatewayServer } from "../gateway/server.js";
 import { createBuiltinToolRegistry } from "../core/tools/builtins/index.js";
 import { fileToolsDir, loadFileToolDefs } from "../core/tools/custom.js";
+import { probeProviderEndpoint, type ProviderProbeResult } from "../core/llm.js";
 import { carapaceSkillsDir, loadSkillsFromDir, SkillRegistry } from "../core/skills.js";
 import { CarapaceStore } from "../storage/sqlite.js";
 import { VERSION } from "../version.js";
@@ -314,14 +314,34 @@ async function commandDoctor(): Promise<number> {
       });
     }
 
-    const llmKeyResolved = resolveSecret(config.llm.apiKey) !== null;
-    results.push({
-      name: "llm",
-      status: llmKeyResolved ? "ok" : "warn",
-      detail: `baseURL=${config.llm.baseURL}, model=${config.llm.model}, apiKey=${describeSecretValue(
-        config.llm.apiKey,
-      )}${llmKeyResolved ? "" : " (unresolved — agent turns will fail until it is set)"}`,
+    // Per-provider config + reachability checks (M7): one entry per provider in the
+    // serving chain (primary first, then llm.fallbacks[]). Unresolved credentials
+    // warn; a rejected credential FAILs like the Discord token probe does.
+    const chain = describeProviderChain(config);
+    chain.forEach((entry, index) => {
+      const configured = entry.keyResolved || entry.kind === "ollama";
+      results.push({
+        name: index === 0 ? "llm" : `llm:fallback${index}`,
+        status: configured ? "ok" : "warn",
+        detail:
+          `${entry.kind}: model=${entry.model} @ ${entry.endpoint}, apiKey=${entry.keyDescribe}` +
+          (configured ? "" : " (unresolved — turns will fail until it is set)"),
+      });
     });
+    const probeTargets = chain.filter((entry) => entry.kind === "ollama" || entry.keyResolved);
+    if (probeTargets.length > 0) {
+      const probes = await Promise.all(
+        probeTargets.map((entry) => probeProviderEndpoint(entry.kind, entry.endpoint, entry.probeApiKey ?? "")),
+      );
+      probes.forEach((probe: ProviderProbeResult, index: number) => {
+        const target = probeTargets[index];
+        results.push({
+          name: index === 0 ? "llm:reachability" : `llm:reachability${index}`,
+          status: probe.ok ? "ok" : probe.fatal ? "fail" : "warn",
+          detail: `${target?.kind ?? "provider"} @ ${target?.endpoint ?? "unknown"}: ${probe.detail}`,
+        });
+      });
+    }
 
     // Dashboard theming (#28300): presets are always valid; "custom" needs a readable,
     // CSS-shaped theme file — an unreadable or invalid one fails the check.
@@ -421,15 +441,19 @@ function commandModels(): number {
   const loaded = loadOrReport();
   if (loaded === null) return 1;
   const { config } = loaded;
-  console.log("model providers:");
-  console.log("  - openai-compatible   POST {llm.baseURL}/chat/completions   implemented (M1)");
-  console.log("  - anthropic           /v1/messages                          planned M2");
-  console.log("  - ollama native       /api/chat                             planned M2");
+  console.log("provider kinds:");
+  console.log("  - openai     POST {baseURL}/chat/completions — OpenAI, OpenRouter, vLLM, LM Studio, Ollama /v1, …");
+  console.log("  - anthropic  POST {baseURL}/v1/messages      — native API (x-api-key, tool_use blocks)");
+  console.log("  - ollama     OpenAI-compatible local server   — http://127.0.0.1:11434/v1");
   console.log("");
-  console.log(
-    `configured: ${config.llm.model} @ ${config.llm.baseURL} (apiKey: ${describeSecretValue(config.llm.apiKey)})`,
-  );
-  console.log("any OpenAI-compatible endpoint works: OpenAI, Ollama (/v1), vLLM, LM Studio, OpenRouter, …");
+  const chain = describeProviderChain(config);
+  console.log(`serving chain (${chain.length} provider${chain.length === 1 ? "" : "s"}):`);
+  chain.forEach((entry, index) => {
+    const role = index === 0 ? "primary" : `fallback ${index}`;
+    console.log(`  ${role}: [${entry.kind}] ${entry.model} @ ${entry.endpoint} (apiKey: ${entry.keyDescribe})`);
+  });
+  console.log("");
+  console.log("fallbacks: llm.fallbacks[] — tried in order when the primary fails (rate limit / timeout / 5xx / network)");
   return 0;
 }
 

@@ -96,12 +96,54 @@ n   * chat, the full reply is delivered to this channel:chatId and the origin ch
 }
 
 /** OpenAI-compatible chat-completions endpoint (OpenAI, Ollama, vLLM, OpenRouter, …). */
+export type LlmProviderKind = "openai" | "anthropic" | "ollama";
+
+/** Native Anthropic API settings (llm.provider = "anthropic"). */
+export interface AnthropicLlmConfig {
+  apiKey: SecretValue;
+  model: string;
+  baseURL: string;
+  /** max_tokens sent on every request — Anthropic requires the field. */
+  maxTokens: number;
+}
+
+/** Local Ollama settings (llm.provider = "ollama"): speaks OpenAI-compatible /v1. */
+export interface OllamaLlmConfig {
+  baseURL: string;
+  model: string;
+  /** Sent as the bearer token; Ollama ignores it. Accepts a SecretRef. */
+  apiKey: SecretValue;
+}
+
+/** One backup provider in llm.fallbacks[] — fully specified, tried in order. */
+export interface FallbackProviderConfig {
+  provider: LlmProviderKind;
+  model: string;
+  baseURL?: string;
+  apiKey?: SecretValue;
+  maxTokens?: number;
+}
+
 export interface LlmConfig {
   /** e.g. https://api.openai.com/v1 — the provider appends /chat/completions. */
   baseURL: string;
   /** Bearer token. Accepts a SecretRef; resolved at runtime, never logged. */
   apiKey: SecretValue;
   model: string;
+  /**
+   * Which provider kind serves turns: "openai" uses the baseURL/apiKey/model fields
+   * above; "anthropic" and "ollama" use their own subsections below.
+   */
+  provider: LlmProviderKind;
+  /** Settings used when provider = "anthropic" (native /v1/messages API). */
+  anthropic: AnthropicLlmConfig;
+  /** Settings used when provider = "ollama" (local OpenAI-compatible server). */
+  ollama: OllamaLlmConfig;
+  /**
+   * Backup providers tried in order when the primary fails (rate limit, timeout,
+   * 5xx, network error). The first provider to answer serves the turn.
+   */
+  fallbacks: FallbackProviderConfig[];
   /** Per-request HTTP timeout in milliseconds. */
   timeoutMs: number;
   /**
@@ -247,6 +289,19 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
       baseURL: "https://api.openai.com/v1",
       apiKey: { env: "CARAPACE_LLM_API_KEY" },
       model: "gpt-4o-mini",
+      provider: "openai",
+      anthropic: {
+        apiKey: { env: "CARAPACE_ANTHROPIC_API_KEY" },
+        model: "claude-sonnet-4-5",
+        baseURL: "https://api.anthropic.com",
+        maxTokens: 8_192,
+      },
+      ollama: {
+        baseURL: "http://127.0.0.1:11434/v1",
+        model: "llama3.1",
+        apiKey: "ollama",
+      },
+      fallbacks: [],
       timeoutMs: 120_000,
       turnTimeoutMs: 600_000,
       watchdogTimeoutSec: 300,
@@ -327,6 +382,27 @@ function readBoolean(
     return fallback;
   }
   return raw;
+}
+
+function readEnumString<T extends string>(
+  obj: Record<string, unknown>,
+  key: string,
+  label: string,
+  errors: string[],
+  allowed: readonly T[],
+  fallback: T,
+): T {
+  const raw = obj[key];
+  if (raw === undefined) return fallback;
+  if (typeof raw !== "string" || !allowed.includes(raw as T)) {
+    errors.push(`${label}.${key} must be one of: ${allowed.join(", ")}`);
+    return fallback;
+  }
+  return raw as T;
+}
+
+function isProviderKind(value: string): value is LlmProviderKind {
+  return value === "openai" || value === "anthropic" || value === "ollama";
 }
 
 function readPort(obj: Record<string, unknown>, label: string, errors: string[], fallback: number): number {
@@ -479,10 +555,96 @@ export function validateConfig(raw: unknown): ValidationResult {
   };
 
   const llmRaw = asObjectOrEmpty(root.llm, "llm", errors);
+  const provider = readEnumString(
+    llmRaw,
+    "provider",
+    "llm",
+    errors,
+    ["openai", "anthropic", "ollama"] as const,
+    defaults.llm.provider,
+  );
+  const anthropicRaw = asObjectOrEmpty(llmRaw.anthropic, "llm.anthropic", errors);
+  const anthropic: AnthropicLlmConfig = {
+    apiKey: readSecretValue(anthropicRaw, "apiKey", "llm.anthropic", errors, defaults.llm.anthropic.apiKey),
+    model: readString(anthropicRaw, "model", "llm.anthropic", errors, defaults.llm.anthropic.model),
+    baseURL: readString(anthropicRaw, "baseURL", "llm.anthropic", errors, defaults.llm.anthropic.baseURL),
+    maxTokens: readBoundedInt(
+      anthropicRaw,
+      "maxTokens",
+      "llm.anthropic",
+      errors,
+      defaults.llm.anthropic.maxTokens,
+      256,
+      200_000,
+    ),
+  };
+  const ollamaRaw = asObjectOrEmpty(llmRaw.ollama, "llm.ollama", errors);
+  const ollama: OllamaLlmConfig = {
+    baseURL: readString(ollamaRaw, "baseURL", "llm.ollama", errors, defaults.llm.ollama.baseURL),
+    model: readString(ollamaRaw, "model", "llm.ollama", errors, defaults.llm.ollama.model),
+    apiKey: readSecretValue(ollamaRaw, "apiKey", "llm.ollama", errors, defaults.llm.ollama.apiKey),
+  };
+  const fallbacks: FallbackProviderConfig[] = [];
+  if (llmRaw.fallbacks !== undefined) {
+    if (!Array.isArray(llmRaw.fallbacks)) {
+      errors.push("llm.fallbacks must be an array of provider entries");
+    } else {
+      llmRaw.fallbacks.forEach((entry, index) => {
+        const label = `llm.fallbacks[${index}]`;
+        if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
+          errors.push(`${label} must be an object`);
+          return;
+        }
+        const record = entry as Record<string, unknown>;
+        const kind = record.provider;
+        if (typeof kind !== "string" || !isProviderKind(kind)) {
+          errors.push(`${label}.provider must be one of: openai, anthropic, ollama`);
+          return;
+        }
+        const entryModel = record.model;
+        if (typeof entryModel !== "string" || entryModel.trim() === "") {
+          errors.push(`${label}.model must be a non-empty string`);
+          return;
+        }
+        let baseURL: string | undefined;
+        if (record.baseURL !== undefined) {
+          if (typeof record.baseURL !== "string" || record.baseURL.trim() === "") {
+            errors.push(`${label}.baseURL must be a non-empty string`);
+            return;
+          }
+          baseURL = record.baseURL;
+        }
+        let apiKey: SecretValue | undefined;
+        if (record.apiKey !== undefined) {
+          if (typeof record.apiKey !== "string" && !isSecretRef(record.apiKey)) {
+            errors.push(
+              `${label}.apiKey must be a string or a SecretRef ({ "env": "NAME" } or { "file": "/path" })`,
+            );
+            return;
+          }
+          apiKey = record.apiKey;
+        }
+        let maxTokens: number | undefined;
+        if (record.maxTokens !== undefined) {
+          const value = record.maxTokens;
+          if (typeof value !== "number" || !Number.isInteger(value) || value < 256 || value > 200_000) {
+            errors.push(`${label}.maxTokens must be an integer between 256 and 200000`);
+            return;
+          }
+          maxTokens = value;
+        }
+        fallbacks.push({ provider: kind, model: entryModel, baseURL, apiKey, maxTokens });
+      });
+    }
+  }
   const llm: LlmConfig = {
     baseURL: readString(llmRaw, "baseURL", "llm", errors, defaults.llm.baseURL),
     apiKey: readSecretValue(llmRaw, "apiKey", "llm", errors, defaults.llm.apiKey),
     model: readString(llmRaw, "model", "llm", errors, defaults.llm.model),
+    provider,
+    anthropic,
+    ollama,
+    fallbacks,
     timeoutMs: readBoundedInt(llmRaw, "timeoutMs", "llm", errors, defaults.llm.timeoutMs, 5_000, 600_000),
     turnTimeoutMs: readBoundedInt(
       llmRaw,
