@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import { mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
   carapaceHome,
@@ -33,7 +34,7 @@ import { MemoryStore, todayIsoDate } from "../core/memory.js";
 import { personaForChannel } from "../core/persona.js";
 import { carapaceSkillsDir, loadSkillsFromDir, runSkillSetup, skillSetupState, SkillRegistry } from "../core/skills.js";
 import { CarapaceStore, type AutomationRow } from "../storage/sqlite.js";
-import { VERSION } from "../version.js";
+import { changelogCovers, VERSION } from "../version.js";
 
 const USAGE = `carapace v${VERSION} — independent multi-channel agent gateway
 
@@ -627,6 +628,20 @@ async function commandDoctor(): Promise<number> {
         detail: "disabled (memory.dreaming.enabled) — daily notes stay the raw log",
       });
     }
+  }
+
+  // Changelog coverage (#48920): release docs must not run ahead of the shipped
+  // version — the packaged CHANGELOG.md needs an entry for the running VERSION.
+  const changelogPath = fileURLToPath(new URL("../../docs/CHANGELOG.md", import.meta.url));
+  try {
+    const changelog = readFileSync(changelogPath, "utf8");
+    results.push(
+      changelogCovers(changelog, VERSION)
+        ? { name: "docs:changelog", status: "ok", detail: `CHANGELOG.md covers v${VERSION}` }
+        : { name: "docs:changelog", status: "warn", detail: `no "## v${VERSION}" entry in docs/CHANGELOG.md — add one before releasing` },
+    );
+  } catch {
+    results.push({ name: "docs:changelog", status: "warn", detail: "docs/CHANGELOG.md not found — changelog coverage unknown" });
   }
 
   const failed = results.filter((r) => r.status === "fail");
